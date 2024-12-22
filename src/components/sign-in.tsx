@@ -1,15 +1,17 @@
 import { signIn } from "../../auth"
+import { Button } from "./ui/button"
 
  
-export default function SignIn() {
+export default function SignIn({provider, providerAlias}: {provider: string, providerAlias: string}) {
   return (
     <form
+    className="w-full"
       action={async () => {
         "use server"
-        await signIn("github")
+        await signIn(provider, {redirectTo: '/dashboard'})
       }}
     >
-      <button type="submit">Signin with GitHub</button>
+      <Button className="w-full" type="submit">{providerAlias}</Button>
     </form>
   )
 } 

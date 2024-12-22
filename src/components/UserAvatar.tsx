@@ -6,13 +6,16 @@ export default async function UserAvatar() {
 
   if (!session?.user) return null;
 
+
   return (
-    <div>
-      <p>{session.user.email}</p>
+    <div className="flex items-center gap-2 bg-accent p-1 px-2 rounded-full ">
+      <p>{session.user.email?.split("@")[0]}</p>
       <Image
+      className="rounded-full "
         width={20}
         height={20}
-        src={session.user.image as string}
+        src={'/icons/user.png'}
+        //src={session.user.image as string || '/icons/user.png'}
         alt="User Avatar"
       />
     </div>
