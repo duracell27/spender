@@ -13,11 +13,11 @@ import { SignOut } from "./signout-button";
 import { auth } from "../../auth";
 
 import { Button } from "./ui/button";
+import ThemeButton from "./ThemeButton";
 
 const Navbar = async () => {
   const session = await auth();
-  if (!session?.user) return null;
-  console.log("user in session", session?.user.role);
+  
   return (
     <div className="flex justify-between items-center p-4">
       <div className="">
@@ -27,7 +27,7 @@ const Navbar = async () => {
           </Link>
         </h1>
       </div>
-      <div className="">
+      <div className="flex gap-2 items-center">
         {!session?.user ? (
           <>
             <Link href={"/sign-in"}>
@@ -55,6 +55,7 @@ const Navbar = async () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <ThemeButton/>
           </>
         )}
       </div>

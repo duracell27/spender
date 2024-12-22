@@ -8,8 +8,8 @@ export default async function UserAvatar() {
 
 
   return (
-    <div className="flex items-center gap-2 bg-accent p-1 px-2 rounded-full ">
-      <p>{session.user.email?.split("@")[0]}</p>
+    <div className="flex items-center gap-2 bg-foreground text-background p-1 px-2 rounded-full ">
+      <p className="">{session.user.email?.split("@")[0]}</p>
       <Image
       className="rounded-full "
         width={20}
