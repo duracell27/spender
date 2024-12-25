@@ -21,6 +21,7 @@ model User {
   role          Role            @default(USER)
   accounts      Account[]
   sessions      Session[]
+  wallets       Wallet[]
   
   Authenticator Authenticator[]
  
@@ -90,7 +91,9 @@ model Wallet {
   id         String @id @default(auto()) @map("_id") @db.ObjectId
   name       String 
   userId     String @db.ObjectId
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
   currencyId String @db.ObjectId
+  currency   Currency @relation(fields: [currencyId], references: [id], onDelete: Cascade)
   balance    Int    @default(0)
   initialBalance  Int @default(0)
   initialBalanceDate  DateTime @default(now())
@@ -104,6 +107,8 @@ model Currency {
   name           String          @unique
   code           String          @unique
   symbol          String          @unique
+
+  wallets Wallet[]
   
 
   createdAt DateTime @default(now())

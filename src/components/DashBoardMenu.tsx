@@ -29,10 +29,10 @@ const DashBoardMenu = () => {
           Категорії
         </div>
       </Link>
-      <Link href="/dashboard/walets">
+      <Link href="/dashboard/wallets">
         <div
           className={`${
-            pathname === "/dashboard/walets"
+            pathname === "/dashboard/wallets"
               ? "bg-muted-foreground text-background"
               : "bg-accent"
           } flex  gap-2 items-center p-2 rounded-md hover:bg-foreground hover:text-background`}

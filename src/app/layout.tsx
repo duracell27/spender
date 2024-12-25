@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="uk-UA">
       <body className="bg-background">
         <ThemeProvider>
           <Toaster />

@@ -7,7 +7,7 @@ const DashboardLayout = ({children}: {children: React.ReactNode}) => {
         <div className="">
             <DashBoardMenu/>
         </div>
-        <div className="">
+        <div className=" flex-1">
             {children}
         </div>
     </div>
