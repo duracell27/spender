@@ -12,7 +12,7 @@ const CategoriesPage = async() => {
   const categories = await prisma.category.findMany({
     where: {
       userId: session.user.id,
-    },
+    }
   });
 
   return (
