@@ -4,6 +4,8 @@ import React, { ReactNode, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { format } from "date-fns";
+import { uk } from "date-fns/locale";
 import {
   Dialog,
   DialogContent,
@@ -28,11 +30,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { addTransaction, editTransaction } from "@/actions/transactions";
 import { Category, TransactionType, Wallet } from "@prisma/client";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 
 // створення схеми через зод
 const transactionSchema = z.object({
@@ -41,6 +51,9 @@ const transactionSchema = z.object({
   transactionType: z.enum(["DEBIT", "CREDIT"]),
   categoryId: z.string().min(1, "Категорія обов'язкова"),
   walletId: z.string().min(1, "Рахунок обов'язковий"),
+  date: z.date({
+    message: "Дата транзакції обов'язкова",
+  }),
 });
 
 // створення типів на основі схеми
@@ -258,6 +271,52 @@ const UserTransactionForm = ({
                 )}
               />
               {/* поле рахунок кінець */}
+              {/* поле дата початок */}
+              <FormField
+                control={form.control}
+                name="date"
+                defaultValue={edit ? data?.date : new Date()}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Дата транзакції</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[240px] pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PP", { locale: uk })
+                            ) : (
+                              <span>Виберіть дату</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          locale={uk}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* поле дата кінець */}
               <Button type="submit">{edit ? "Редагувати" : "Створити"}</Button>
             </form>
           </Form>

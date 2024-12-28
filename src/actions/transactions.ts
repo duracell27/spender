@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "../../prisma/prisma";
 import { TransactionFormValues } from "@/components/forms/UserTransactionForm";
 import { auth } from "../../auth";
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 
 
 export const addTransaction = async (data: TransactionFormValues) => {
@@ -16,6 +17,7 @@ export const addTransaction = async (data: TransactionFormValues) => {
           amount: data.amount,
           transactionType: data.transactionType,
           userId: session.user.id,
+          date: data.date,
           categoryId: data.categoryId,
           walletId: data.walletId,
         }
@@ -41,6 +43,7 @@ export const editTransaction = async (data: TransactionFormValues, id:string) =>
           amount: data.amount,
           transactionType: data.transactionType,
           userId: session.user.id,
+          date: data.date,
           categoryId: data.categoryId,
           walletId: data.walletId,
         }
@@ -67,4 +70,40 @@ export const deleteTransaction = async (id:string) => {
   revalidatePath("/dashboard");
 };
 
+
+export async function getTransactionsByPeriod(period: "day" | "week" | "month" | "year", activeWalletId: string) {
+  let startDate: Date;
+  let endDate: Date;
+
+  if (period === "day") {
+    startDate = startOfDay(new Date());
+    endDate = endOfDay(new Date());
+  } else if (period === "week") {
+    startDate = startOfWeek(new Date(), { weekStartsOn: 1 });
+    endDate = endOfWeek(new Date(), { weekStartsOn: 1 });
+  } else if (period === "month") {
+    startDate = startOfMonth(new Date());
+    endDate = endOfMonth(new Date());
+  } else if (period === "year") {
+    startDate = startOfYear(new Date());
+    endDate = endOfYear(new Date());
+  } else {
+    throw new Error("Invalid period");
+  }
+
+  const transactions = await prisma.transaction.findMany({
+    where: {
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+      ...(activeWalletId !== 'all' && { walletId: activeWalletId })
+    },
+    include: {
+      category: true, // Пов’язана категорія, якщо потрібно
+    },
+  });
+
+  return {transactions, startDate, endDate};
+}
 

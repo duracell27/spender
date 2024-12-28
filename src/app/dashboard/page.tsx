@@ -2,12 +2,11 @@ import UserTransactionForm from "@/components/forms/UserTransactionForm";
 import React from "react";
 import { auth } from "../../../auth";
 import { prisma } from "../../../prisma/prisma";
-import { Pencil, Trash2 } from "lucide-react";
-import Confirm from "@/components/Confirm";
-import { deleteTransaction } from "@/actions/transactions";
-import { calculateBalance } from "@/lib/utils";
-import { format } from "date-fns";
-import { uk } from "date-fns/locale";
+
+import DashboardTabs from "@/components/tabs/DashboardTabs";
+// import WalletSelect from "@/components/WalletSelect";
+import { ActiveWalletSelect } from "@/components/forms/UserDashboardWaletSelect";
+// import DashboardWrapper from "@/components/DashboardWrapper";
 
 const DashboardPage = async () => {
   const session = await auth();
@@ -22,20 +21,25 @@ const DashboardPage = async () => {
       userId: session.user.id,
     },
   });
-
-  const transactions = await prisma.transaction.findMany({
+  const userSettings = await prisma.userSettings.findUnique({
     where: {
       userId: session.user.id,
     },
-    include: {
-      category: true,
-    },
   });
-  
 
-  console.log(transactions);
+  if (!userSettings?.id) return null
+
+  console.log('userSettings from server', userSettings)
+
   return (
     <div className="">
+
+      {/* <DashboardWrapper wallets={wallets} categories={categories}/> */}
+      {userSettings?.id && (<ActiveWalletSelect wallets={wallets} userSettings={userSettings}/>)}
+
+      {/* <WalletSelect wallets={wallets}/> */}
+      <DashboardTabs wallets={wallets} categories={categories} userSettings={userSettings}/>
+
       <div className="flex items-center gap-2">
         <UserTransactionForm
           title="Дохід"
@@ -52,40 +56,7 @@ const DashboardPage = async () => {
       </div>
 
 
-      <div className="">Баланс {calculateBalance(transactions)}</div>
-      <div className="">
-        {transactions.map((transaction, inex) => (
-          <div key={inex} className="flex justify-between">
-            <span>{format(transaction.createdAt, "PP", { locale: uk })}</span>
-            <h1 className="font-bold">{transaction.title}</h1>
-            <p>
-              {transaction.amount}{" "}
-              {transaction.transactionType === "DEBIT" ? (
-                <span className="text-green-500">Дохід</span>
-              ) : (
-                <span className="text-red-500">Витрата</span>
-              )}
-            </p>
-            <div className="flex items-center gap-2">
-              <UserTransactionForm
-                title={<Pencil />}
-                edit={true}
-                data={transaction}
-                id={transaction.id}
-                wallets={wallets}
-                initType={transaction.transactionType}
-                categories={categories}
-              />
-              <Confirm
-                title={<Trash2 />}
-                actionButtonTitle="Видалити"
-                fn={deleteTransaction}
-                id={transaction.id}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+
     </div>
   );
 };

@@ -6,13 +6,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function calculateBalance(transactions: Transaction[]): number {
-  return transactions.reduce((balance, transaction) => {
-    if (transaction.transactionType === "DEBIT") {
-      return balance + transaction.amount; // Додаємо до балансу
-    } else if (transaction.transactionType === "CREDIT") {
-      return balance - transaction.amount; // Віднімаємо від балансу
-    }
-    return balance;
-  }, 0); // Початковий баланс — 0
+export function calculateBalanceAndSums(transactions: Transaction[]) {
+  return transactions.reduce(
+    (result, transaction) => {
+      if (transaction.transactionType === "DEBIT") {
+        result.debitSum += transaction.amount; // Додаємо до дебету (доходів)
+        result.balance += transaction.amount; // Додаємо до балансу
+      } else if (transaction.transactionType === "CREDIT") {
+        result.creditSum += transaction.amount; // Додаємо до кредиту (витрат)
+        result.balance -= transaction.amount; // Віднімаємо від балансу
+      }
+      return result;
+    },
+    { balance: 0, creditSum: 0, debitSum: 0 } // Початкові значення
+  );
 }
+
