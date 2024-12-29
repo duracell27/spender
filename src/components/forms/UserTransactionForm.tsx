@@ -43,6 +43,7 @@ import { addTransaction, editTransaction } from "@/actions/transactions";
 import { Category, TransactionType, Wallet } from "@prisma/client";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
+import Link from "next/link";
 
 // створення схеми через зод
 const transactionSchema = z.object({
@@ -206,7 +207,7 @@ const UserTransactionForm = ({
                 defaultValue={edit ? data?.categoryId : ""}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Категорія</FormLabel>
+                    <FormLabel className="flex items-center justify-between"><span>Категорія</span><span><Link href="/dashboard/categories">Додати нову?</Link></span></FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={edit ? data?.categoryId : field.value}

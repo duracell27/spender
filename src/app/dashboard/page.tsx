@@ -6,6 +6,7 @@ import { prisma } from "../../../prisma/prisma";
 import DashboardTabs from "@/components/tabs/DashboardTabs";
 // import WalletSelect from "@/components/WalletSelect";
 import { ActiveWalletSelect } from "@/components/forms/UserDashboardWaletSelect";
+import Link from "next/link";
 // import DashboardWrapper from "@/components/DashboardWrapper";
 
 const DashboardPage = async () => {
@@ -29,7 +30,15 @@ const DashboardPage = async () => {
 
   if (!userSettings?.id) return null
 
-  console.log('userSettings from server', userSettings)
+  if(wallets.length===0) return (
+    <div className="flex h-screen justify-center items-center">
+      <div className="text-center">
+        <p>Ваші рахунки не знайдено</p>
+        <p>Будь ласка, додайте рахунок для перегляду транзакцій</p>
+        <Link href="/dashboard/wallets">Додати</Link>
+      </div>
+    </div>
+  )
 
   return (
     <div className="">

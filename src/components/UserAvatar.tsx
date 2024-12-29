@@ -14,8 +14,8 @@ export default async function UserAvatar() {
       className="rounded-full "
         width={20}
         height={20}
-        src={'/icons/user.png'}
-        //src={session.user.image as string || '/icons/user.png'}
+        // src={'/icons/user.png'}
+        src={session.user.image as string || '/icons/user.png'}
         alt="User Avatar"
       />
     </div>
