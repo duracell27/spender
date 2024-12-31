@@ -41,7 +41,7 @@ export const addTransaction = async (data: TransactionFormValues) => {
 export const editTransaction = async (data: TransactionFormValues, id: string) => {
   const session = await auth();
   if (!session?.user.id) return;
-  console.log("edit transaction", data);
+
   try {
     await prisma.transaction.update({
       where: {

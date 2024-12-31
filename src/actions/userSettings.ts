@@ -24,7 +24,7 @@ export const addUserSettings = async (data: ActiveWalletSchema) => {
 };
 
 export const editUserSettings = async (data: ActiveWalletSchema, id:string) => {
-    console.log("edit currency", data);
+ 
     try {
        await prisma.userSettings.update({
           where:{

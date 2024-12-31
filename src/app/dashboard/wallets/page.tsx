@@ -1,13 +1,21 @@
-import UserWaletForm from '@/components/forms/UserWaletForm'
-import React from 'react'
-import { prisma } from '../../../../prisma/prisma';
-import { auth } from '../../../../auth';
-import { Pencil, Trash2 } from 'lucide-react';
-import Confirm from '@/components/Confirm';
-import { deleteWallet } from '@/actions/wallets';
+import UserWaletForm from "@/components/forms/UserWaletForm";
+import React from "react";
+import { prisma } from "../../../../prisma/prisma";
+import { auth } from "../../../../auth";
+import { Pencil, Trash2 } from "lucide-react";
+import Confirm from "@/components/Confirm";
+import { deleteWallet } from "@/actions/wallets";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-
-const WaletsPage = async() => {
+const WaletsPage = async () => {
   const currencys = await prisma.currency.findMany();
   const session = await auth();
   if (!session?.user.id) return;
@@ -17,18 +25,34 @@ const WaletsPage = async() => {
     },
     include: {
       currency: true,
-    }
+    },
   });
 
   return (
-    <div className=''>
-      <UserWaletForm title="Додати рахунок" currencys={currencys}/>
-      {wallets.map((wallet, inex)=>(
-        <div key={inex} className="flex justify-between">
-          <h1 className='font-bold'>{wallet.name}</h1>
-          <p>{wallet.balance} {wallet.currency.symbol}</p>
-          <div className="flex items-center gap-2">
-          <UserWaletForm
+    <div className="">
+      <UserWaletForm title="Додати рахунок" currencys={currencys} />
+
+      <Table>
+        <TableCaption className="caption-top">Лист рахунків</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="">Назва</TableHead>
+            <TableHead>Баланс</TableHead>
+
+            <TableHead className="text-right">Дії</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {wallets.map((wallet, inex) => (
+            <TableRow key={wallet.id}>
+              <TableCell className="font-medium">{wallet.name}</TableCell>
+              <TableCell>
+                {wallet.balance} {wallet.currency.symbol}
+              </TableCell>
+
+              <TableCell className="text-right">
+                <div className="flex items-center justify-end gap-2">
+                  <UserWaletForm
                     title={<Pencil />}
                     edit={true}
                     data={wallet}
@@ -41,11 +65,16 @@ const WaletsPage = async() => {
                     fn={deleteWallet}
                     id={wallet.id}
                   />
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
-export default WaletsPage
+      
+    </div>
+  );
+};
+
+export default WaletsPage;

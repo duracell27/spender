@@ -5,42 +5,79 @@ import UserCategoryForm from "@/components/forms/UserCategoryForm";
 import { Pencil, Trash2 } from "lucide-react";
 import Confirm from "@/components/Confirm";
 import { deleteCategory } from "@/actions/categories";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-const CategoriesPage = async() => {
+const CategoriesPage = async () => {
   const session = await auth();
   if (!session?.user.id) return;
   const categories = await prisma.category.findMany({
     where: {
       userId: session.user.id,
-    }
+    },
   });
 
   return (
     <div className="">
       <UserCategoryForm title="Додати категорію" />
-      {!categories.length && <div>немає категорій</div>}
-      {categories.map((category, inex) => (
-        <div key={inex} className="flex justify-between">
-          <h1 className="font-bold">{category.name}</h1>
-          <p>{category.categoryType==="SPENDING"?(<span className="text-red-500">Витрата</span>):(<span className="text-green-500">Дохід</span>)}</p>
-          <div className="flex items-center gap-2">
-            <UserCategoryForm
-              title={<Pencil />}
-              edit={true}
-              data={category}
-              id={category.id}
-            />
-            <Confirm
-              title={<Trash2 />}
-              actionButtonTitle="Видалити"
-              fn={deleteCategory}
-              id={category.id}
-            />
+      {!categories.length && (
+        <div className="flex h-screen justify-center items-center">
+          <div className="text-center">
+            <p>У вас ще немає категорій витрат</p>
           </div>
         </div>
-      ))}
+      )}
+
+      <Table>
+        <TableCaption className="caption-top">Лист категорій</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="">Назва</TableHead>
+            <TableHead>Тип</TableHead>
+            <TableHead className="text-right">Дії</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {categories.map((category, inex) => (
+            <TableRow key={category.id}>
+              <TableCell className="font-medium">{category.name}</TableCell>
+              <TableCell>
+                {category.categoryType === "SPENDING" ? (
+                  <span className="text-red-500 font-bold">Витрата</span>
+                ) : (
+                  <span className="text-green-500 font-bold">Дохід</span>
+                )}
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex items-center justify-end gap-2">
+                  <UserCategoryForm
+                    title={<Pencil />}
+                    edit={true}
+                    data={category}
+                    id={category.id}
+                  />
+                  <Confirm
+                    title={<Trash2 />}
+                    actionButtonTitle="Видалити"
+                    fn={deleteCategory}
+                    id={category.id}
+                  />
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
     </div>
   );
-}
+};
 
-export default CategoriesPage
+export default CategoriesPage;

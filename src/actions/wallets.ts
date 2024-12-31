@@ -26,7 +26,7 @@ export const addWallet = async (data: WalletFormValues) => {
 };
 
 export const editWallet = async (data: WalletFormValues, id:string) => {
-    console.log("edit currency", data);
+
     try {
        await prisma.wallet.update({
           where:{

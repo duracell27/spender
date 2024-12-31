@@ -29,7 +29,7 @@ export const editCurrency = async (data: {
   code: string;
   symbol: string;
 }, id:string) => {
-  console.log("edit currency", data);
+
   try {
      await prisma.currency.update({
         where:{

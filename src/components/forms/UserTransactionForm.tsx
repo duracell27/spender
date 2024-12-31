@@ -40,7 +40,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { addTransaction, editTransaction } from "@/actions/transactions";
-import { Category, TransactionType, UserSettings, Wallet } from "@prisma/client";
+import {
+  Category,
+  TransactionType,
+  UserSettings,
+  Wallet,
+} from "@prisma/client";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import Link from "next/link";
@@ -51,11 +56,14 @@ const transactionSchema = z.object({
   amount: z.coerce.number().min(0, "Сума обов'язкова"),
   transactionType: z.enum(["DEBIT", "CREDIT"]),
   categoryId: z.string().min(1, "Категорія обов'язкова"),
-  walletId: z.string({
-    required_error: "Виберіть рахунок",
-  }).min(1, "Рахунок обов'язковий").refine((value) => value !== "all", {
-    message: "Виберіть певних рахунок",
-  }),
+  walletId: z
+    .string({
+      required_error: "Виберіть рахунок",
+    })
+    .min(1, "Рахунок обов'язковий")
+    .refine((value) => value !== "all", {
+      message: "Виберіть певних рахунок",
+    }),
   date: z.date({
     message: "Дата транзакції обов'язкова",
   }),
@@ -72,8 +80,7 @@ const UserTransactionForm = ({
   initType,
   wallets,
   categories,
-  userSettings
-
+  userSettings,
 }: {
   title: string | ReactNode;
   edit?: boolean;
@@ -86,20 +93,23 @@ const UserTransactionForm = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false); // Контроль видимості діалогу
 
-  console.log('активний гаманець', userSettings?.activeWalletId)
+  console.log("активний гаманець", userSettings?.activeWalletId);
   // console.log('гаманець', wallets)
 
   // створюю обєкт форми з для реакт хук форм
-   const form = useForm<TransactionFormValues>({
+  const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
   });
-  
 
-  if(userSettings && (form.getValues().walletId === undefined)){
-    form.setValue('walletId', userSettings.activeWalletId)
+  if (userSettings && (form.getValues().walletId === undefined)) {
+    if(userSettings.activeWalletId === 'all'){
+      form.setValue("walletId", '');
+    }else{
+      form.setValue("walletId", userSettings.activeWalletId);
+    }
   }
 
-  console.log('значення форми', form.getValues())
+  console.log("значення форми", form.getValues());
 
   //обробка відправки форми
   async function onSubmit(data: TransactionFormValues) {
@@ -121,10 +131,22 @@ const UserTransactionForm = ({
 
   return (
     <div>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog
+        open={isOpen}
+        onOpenChange={() => {
+          setIsOpen(!isOpen)
+          form.reset();
+        }}
+      >
         <DialogTrigger className="" asChild>
           <Button
-            className={edit ? 'bg-primary' :  initType === "CREDIT" ? "bg-red-500 p-10" : "bg-green-500 p-10"}
+            className={
+              edit
+                ? "bg-primary"
+                : initType === "CREDIT"
+                ? "bg-red-500 p-10"
+                : "bg-green-500 p-10"
+            }
             onClick={() => setIsOpen(true)}
           >
             {title}
@@ -225,7 +247,12 @@ const UserTransactionForm = ({
                 defaultValue={edit ? data?.categoryId : ""}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center justify-between"><span>Категорія</span><span><Link href="/dashboard/categories">Додати нову?</Link></span></FormLabel>
+                    <FormLabel className="flex items-center justify-between">
+                      <span>Категорія</span>
+                      <span>
+                        <Link href="/dashboard/categories">Додати нову?</Link>
+                      </span>
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={edit ? data?.categoryId : field.value}
@@ -237,13 +264,19 @@ const UserTransactionForm = ({
                       </FormControl>
                       <SelectContent>
                         {categories.map((category, index) => {
-                          if (initType==='DEBIT' && category.categoryType === "INCOME") {
+                          if (
+                            initType === "DEBIT" &&
+                            category.categoryType === "INCOME"
+                          ) {
                             return (
                               <SelectItem key={index} value={category.id}>
                                 {category.name}
                               </SelectItem>
                             );
-                          } else if(initType==='CREDIT' && category.categoryType === "SPENDING") {
+                          } else if (
+                            initType === "CREDIT" &&
+                            category.categoryType === "SPENDING"
+                          ) {
                             return (
                               <SelectItem key={index} value={category.id}>
                                 {category.name}
@@ -263,13 +296,17 @@ const UserTransactionForm = ({
               <FormField
                 control={form.control}
                 name="walletId"
-                
                 // value={edit ? data?.walletId : userSettings.activeWalletId}
-                 //defaultValue={edit ? data?.walletId : userSettings.activeWalletId}
-                render={({ field },) => (
+                defaultValue={
+                  edit ? data?.walletId : userSettings.activeWalletId
+                }
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Рахунок</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Виберіть рахунок" />
