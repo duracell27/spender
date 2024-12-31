@@ -43,7 +43,7 @@ const WaletsPage = async () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {wallets.map((wallet, inex) => (
+          {wallets.map((wallet) => (
             <TableRow key={wallet.id}>
               <TableCell className="font-medium">{wallet.name}</TableCell>
               <TableCell>
