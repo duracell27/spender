@@ -45,7 +45,7 @@ const CategoriesPage = async () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {categories.map((category, inex) => (
+          {categories.map((category) => (
             <TableRow key={category.id}>
               <TableCell className="font-medium">{category.name}</TableCell>
               <TableCell>
