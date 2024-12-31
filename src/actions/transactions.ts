@@ -4,74 +4,87 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "../../prisma/prisma";
 import { TransactionFormValues } from "@/components/forms/UserTransactionForm";
 import { auth } from "../../auth";
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
-
+import {
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} from "date-fns";
 
 export const addTransaction = async (data: TransactionFormValues) => {
   const session = await auth();
   if (!session?.user.id) return;
+  console.log("активний гаманець з сервера", data.walletId);
   try {
-     await prisma.transaction.create({
-        data: {
-          title: data.title,
-          amount: data.amount,
-          transactionType: data.transactionType,
-          userId: session.user.id,
-          date: data.date,
-          categoryId: data.categoryId,
-          walletId: data.walletId,
-        }
-      });
+    await prisma.transaction.create({
+      data: {
+        title: data.title,
+        amount: data.amount,
+        transactionType: data.transactionType,
+        userId: session.user.id,
+        date: data.date,
+        categoryId: data.categoryId,
+        walletId: data.walletId,
+      },
+    });
   } catch (error) {
     console.error(error);
   }
-  
+
   revalidatePath("/dashboard");
 };
 
-export const editTransaction = async (data: TransactionFormValues, id:string) => {
+export const editTransaction = async (data: TransactionFormValues, id: string) => {
   const session = await auth();
   if (!session?.user.id) return;
   console.log("edit transaction", data);
   try {
-     await prisma.transaction.update({
-        where:{
-          id
-        },
-        data: {
-          title: data.title,
-          amount: data.amount,
-          transactionType: data.transactionType,
-          userId: session.user.id,
-          date: data.date,
-          categoryId: data.categoryId,
-          walletId: data.walletId,
-        }
-      });
+    await prisma.transaction.update({
+      where: {
+        id,
+      },
+      data: {
+        title: data.title,
+        amount: data.amount,
+        transactionType: data.transactionType,
+        userId: session.user.id,
+        date: data.date,
+        categoryId: data.categoryId,
+        walletId: data.walletId,
+      },
+    });
   } catch (error) {
     console.error(error);
   }
-  
+
   revalidatePath("/dashboard");
 };
 
-export const deleteTransaction = async (id:string) => {
-  
+export const deleteTransaction = async (id: string) => {
   try {
-     await prisma.transaction.delete({
-        where:{
-          id
-        }
-      });
+    await prisma.transaction.delete({
+      where: {
+        id,
+      },
+    });
   } catch (error) {
     console.error(error);
   }
-  
+
   revalidatePath("/dashboard");
 };
 
+export async function getTransactionsByPeriod(
+  period: "day" | "week" | "month" | "year",
+  activeWalletId: string
+) {
+  const session = await auth();
+  if (!session?.user.id) return { transactions: [], startDate: new Date(), endDate: new Date() };
 
-export async function getTransactionsByPeriod(period: "day" | "week" | "month" | "year", activeWalletId: string) {
   let startDate: Date;
   let endDate: Date;
 
@@ -97,13 +110,14 @@ export async function getTransactionsByPeriod(period: "day" | "week" | "month" |
         gte: startDate,
         lte: endDate,
       },
-      ...(activeWalletId !== 'all' && { walletId: activeWalletId })
+      userId: session.user.id,
+      ...(activeWalletId !== "all" && { walletId: activeWalletId }),
     },
     include: {
-      category: true, // Пов’язана категорія, якщо потрібно
+      category: true,
+      wallet: true, // Пов’язана категорія, якщо потрібно
     },
   });
 
-  return {transactions, startDate, endDate};
+  return { transactions, startDate, endDate };
 }
-

@@ -40,7 +40,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { addTransaction, editTransaction } from "@/actions/transactions";
-import { Category, TransactionType, Wallet } from "@prisma/client";
+import { Category, TransactionType, UserSettings, Wallet } from "@prisma/client";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import Link from "next/link";
@@ -51,7 +51,11 @@ const transactionSchema = z.object({
   amount: z.coerce.number().min(0, "Сума обов'язкова"),
   transactionType: z.enum(["DEBIT", "CREDIT"]),
   categoryId: z.string().min(1, "Категорія обов'язкова"),
-  walletId: z.string().min(1, "Рахунок обов'язковий"),
+  walletId: z.string({
+    required_error: "Виберіть рахунок",
+  }).min(1, "Рахунок обов'язковий").refine((value) => value !== "all", {
+    message: "Виберіть певних рахунок",
+  }),
   date: z.date({
     message: "Дата транзакції обов'язкова",
   }),
@@ -68,6 +72,8 @@ const UserTransactionForm = ({
   initType,
   wallets,
   categories,
+  userSettings
+
 }: {
   title: string | ReactNode;
   edit?: boolean;
@@ -76,13 +82,25 @@ const UserTransactionForm = ({
   initType: TransactionType;
   wallets: Wallet[];
   categories: Category[];
+  userSettings: UserSettings;
 }) => {
   const [isOpen, setIsOpen] = useState(false); // Контроль видимості діалогу
 
+  console.log('активний гаманець', userSettings?.activeWalletId)
+  // console.log('гаманець', wallets)
+
   // створюю обєкт форми з для реакт хук форм
-  const form = useForm<TransactionFormValues>({
+   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
   });
+  
+
+  if(userSettings && (form.getValues().walletId === undefined)){
+    form.setValue('walletId', userSettings.activeWalletId)
+  }
+
+  console.log('значення форми', form.getValues())
+
   //обробка відправки форми
   async function onSubmit(data: TransactionFormValues) {
     try {
@@ -106,7 +124,7 @@ const UserTransactionForm = ({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger className="" asChild>
           <Button
-            className={edit ? 'bg-primary' :  initType === "CREDIT" ? "bg-red-500" : "bg-green-500"}
+            className={edit ? 'bg-primary' :  initType === "CREDIT" ? "bg-red-500 p-10" : "bg-green-500 p-10"}
             onClick={() => setIsOpen(true)}
           >
             {title}
@@ -245,14 +263,13 @@ const UserTransactionForm = ({
               <FormField
                 control={form.control}
                 name="walletId"
-                defaultValue={edit ? data?.walletId : ""}
-                render={({ field }) => (
+                
+                // value={edit ? data?.walletId : userSettings.activeWalletId}
+                 //defaultValue={edit ? data?.walletId : userSettings.activeWalletId}
+                render={({ field },) => (
                   <FormItem>
                     <FormLabel>Рахунок</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={edit ? data?.walletId : field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Виберіть рахунок" />
@@ -261,7 +278,7 @@ const UserTransactionForm = ({
                       <SelectContent>
                         {wallets.map((wallet, index) => (
                           <SelectItem key={index} value={wallet.id}>
-                            {wallet.name}
+                            {wallet.name} {wallet.id}
                           </SelectItem>
                         ))}
                       </SelectContent>

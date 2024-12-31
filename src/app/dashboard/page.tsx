@@ -1,4 +1,4 @@
-import UserTransactionForm from "@/components/forms/UserTransactionForm";
+
 import React from "react";
 import { auth } from "../../../auth";
 import { prisma } from "../../../prisma/prisma";
@@ -7,6 +7,7 @@ import DashboardTabs from "@/components/tabs/DashboardTabs";
 // import WalletSelect from "@/components/WalletSelect";
 import { ActiveWalletSelect } from "@/components/forms/UserDashboardWaletSelect";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 // import DashboardWrapper from "@/components/DashboardWrapper";
 
 const DashboardPage = async () => {
@@ -35,34 +36,22 @@ const DashboardPage = async () => {
       <div className="text-center">
         <p>Ваші рахунки не знайдено</p>
         <p>Будь ласка, додайте рахунок для перегляду транзакцій</p>
-        <Link href="/dashboard/wallets">Додати</Link>
+        <Link className="mt-4" href="/dashboard/wallets"><Button>Додати</Button></Link>
       </div>
     </div>
   )
 
   return (
-    <div className="">
+    <div className="p-4">
 
-      {/* <DashboardWrapper wallets={wallets} categories={categories}/> */}
       {userSettings?.id && (<ActiveWalletSelect wallets={wallets} userSettings={userSettings}/>)}
 
-      {/* <WalletSelect wallets={wallets}/> */}
+
+
+
       <DashboardTabs wallets={wallets} categories={categories} userSettings={userSettings}/>
 
-      <div className="flex items-center gap-2">
-        <UserTransactionForm
-          title="Дохід"
-          initType="DEBIT"
-          wallets={wallets}
-          categories={categories}
-        />
-        <UserTransactionForm
-          title="Витрата"
-          initType="CREDIT"
-          wallets={wallets}
-          categories={categories}
-        />
-      </div>
+      
 
 
 

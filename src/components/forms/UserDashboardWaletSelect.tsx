@@ -37,8 +37,6 @@ export function  ActiveWalletSelect({wallets, userSettings}:{wallets: Wallet[], 
     resolver: zodResolver(ActiveWalletSchema),
   })
 
-  console.log('userSettings', userSettings)
-
   async function onSubmit(data: ActiveWalletSchema) {
     console.log(data)
     try {
@@ -49,6 +47,9 @@ export function  ActiveWalletSelect({wallets, userSettings}:{wallets: Wallet[], 
   }
 
   return (
+    <div className="flex justify-end mb-4">
+
+   
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="">
         <FormField
@@ -82,8 +83,8 @@ export function  ActiveWalletSelect({wallets, userSettings}:{wallets: Wallet[], 
             </FormItem>
           )}
         />
-        {/* <Button type="submit">Вибрати</Button> */}
       </form>
     </Form>
+    </div>
   )
 }
