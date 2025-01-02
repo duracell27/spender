@@ -313,7 +313,7 @@ const UserTransactionForm = ({
                       <SelectContent>
                         {wallets.map((wallet, index) => (
                           <SelectItem key={index} value={wallet.id}>
-                            {wallet.name} {wallet.id}
+                            {wallet.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

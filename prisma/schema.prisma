@@ -23,6 +23,17 @@ enum TransactionType {
   CREDIT
 }
 
+enum Period {
+  DAY
+  WEEK
+  MONTH
+  YEAR
+}
+
+enum Language {
+  UA
+}
+
 model User {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
@@ -51,6 +62,9 @@ model UserSettings {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   activeWalletId String @default("all")
+  defaultCurrencyId String @db.ObjectId
+  defaultPeriod Period @default(MONTH)
+  defaultLanguage Language @default(UA)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

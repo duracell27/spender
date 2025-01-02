@@ -49,6 +49,9 @@ const Navbar = async () => {
                 <DropdownMenuLabel>
                   <Link href="/dashboard">Дашборд</Link>
                 </DropdownMenuLabel>
+                <DropdownMenuLabel>
+                  <Link href="/settings">Налаштування</Link>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <SignOut />

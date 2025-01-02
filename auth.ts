@@ -22,7 +22,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         await prisma.userSettings.create({
           data: {
             userId: user.id,
-            // Додайте тут будь-які поля, які вам потрібні
+            defaultLanguage: "UA", // зараз тільки україна
+            defaultCurrencyId: '676865fba7e2fdc9054fd700', // зараз тільки гривня
+            defaultPeriod: 'MONTH',
           },
         });
         await prisma.category.create({
