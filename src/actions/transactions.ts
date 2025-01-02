@@ -18,7 +18,7 @@ import {
 export const addTransaction = async (data: TransactionFormValues) => {
   const session = await auth();
   if (!session?.user.id) return;
-  console.log("активний гаманець з сервера", data.walletId);
+
   try {
     await prisma.transaction.create({
       data: {
@@ -31,6 +31,33 @@ export const addTransaction = async (data: TransactionFormValues) => {
         walletId: data.walletId,
       },
     });
+
+    // Визначаємо зміну балансу залежно від типу транзакції
+    const balanceChange =
+      data.transactionType === "CREDIT"
+        ? -data.amount // Витрати
+        : data.amount; // Дохід
+
+    const debitChange = data.transactionType === "DEBIT" ? data.amount : 0;
+    const creditChange = data.transactionType === "CREDIT" ? data.amount : 0;
+
+    await prisma.wallet.update({
+      where: {
+        id: data.walletId,
+      },
+      data: {
+        balance: {
+          increment: balanceChange,
+        },
+        debitSum: {
+          increment: debitChange, // Додаємо до debitSum, якщо тип DEBIT
+        },
+        creditSum: {
+          increment: creditChange, // Додаємо до creditSum, якщо тип CREDIT
+        },
+      },
+    });
+    
   } catch (error) {
     console.error(error);
   }
@@ -43,6 +70,40 @@ export const editTransaction = async (data: TransactionFormValues, id: string) =
   if (!session?.user.id) return;
 
   try {
+    const transaction = await prisma.transaction.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (transaction) {
+      // Визначаємо зміну балансу залежно від типу транзакції
+      const balanceChange =
+        transaction.transactionType === "CREDIT"
+          ? transaction.amount // Витрати
+          : -transaction.amount; // Дохід
+
+      const debitChange = transaction.transactionType === "DEBIT" ? -transaction.amount : 0;
+      const creditChange = transaction.transactionType === "CREDIT" ? -transaction.amount : 0;
+
+      await prisma.wallet.update({
+        where: {
+          id: transaction.walletId,
+        },
+        data: {
+          balance: {
+            increment: balanceChange,
+          },
+          debitSum: {
+            increment: debitChange, // Додаємо до debitSum, якщо тип DEBIT
+          },
+          creditSum: {
+            increment: creditChange, // Додаємо до creditSum, якщо тип CREDIT
+          },
+        },
+      });
+    }
+
     await prisma.transaction.update({
       where: {
         id,
@@ -57,6 +118,32 @@ export const editTransaction = async (data: TransactionFormValues, id: string) =
         walletId: data.walletId,
       },
     });
+
+    // Визначаємо зміну балансу залежно від типу транзакції
+    const balanceChange =
+      data.transactionType === "CREDIT"
+        ? -data.amount // Витрати
+        : data.amount; // Дохід
+
+    const debitChange = data.transactionType === "DEBIT" ? data.amount : 0;
+    const creditChange = data.transactionType === "CREDIT" ? data.amount : 0;
+
+    await prisma.wallet.update({
+      where: {
+        id: data.walletId,
+      },
+      data: {
+        balance: {
+          increment: balanceChange,
+        },
+        debitSum: {
+          increment: debitChange, // Додаємо до debitSum, якщо тип DEBIT
+        },
+        creditSum: {
+          increment: creditChange, // Додаємо до creditSum, якщо тип CREDIT
+        },
+      },
+    });
   } catch (error) {
     console.error(error);
   }
@@ -66,6 +153,41 @@ export const editTransaction = async (data: TransactionFormValues, id: string) =
 
 export const deleteTransaction = async (id: string) => {
   try {
+    const transaction = await prisma.transaction.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (transaction) {
+      
+      // Визначаємо зміну балансу залежно від типу транзакції
+      const balanceChange =
+        transaction.transactionType === "CREDIT"
+          ? transaction.amount // Витрати
+          : -transaction.amount; // Дохід
+
+      const debitChange = transaction.transactionType === "DEBIT" ? -transaction.amount : 0;
+      const creditChange = transaction.transactionType === "CREDIT" ? -transaction.amount : 0;
+
+      await prisma.wallet.update({
+        where: {
+          id: transaction.walletId,
+        },
+        data: {
+          balance: {
+            increment: balanceChange,
+          },
+          debitSum: {
+            increment: debitChange, // Додаємо до debitSum, якщо тип DEBIT
+          },
+          creditSum: {
+            increment: creditChange, // Додаємо до creditSum, якщо тип CREDIT
+          },
+        },
+      });
+    }
+
     await prisma.transaction.delete({
       where: {
         id,
@@ -80,7 +202,7 @@ export const deleteTransaction = async (id: string) => {
 
 export async function getTransactionsByPeriod(
   period: "day" | "week" | "month" | "year",
-  activeWalletId: string
+  activeWalletId: string = "all"
 ) {
   const session = await auth();
   if (!session?.user.id) return { transactions: [], startDate: new Date(), endDate: new Date() };

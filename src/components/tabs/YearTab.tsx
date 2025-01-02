@@ -35,7 +35,7 @@ const DayTab = async ({
   const {transactions, startDate } = await getTransactionsByPeriod("year", userSettings.activeWalletId);
 
   const { balance, creditSum, debitSum } =
-    calculateBalanceAndSums(transactions);
+    calculateBalanceAndSums(wallets, userSettings.activeWalletId);
 
   return (
     <div>

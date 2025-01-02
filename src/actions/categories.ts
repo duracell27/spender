@@ -24,7 +24,7 @@ export const addCategory = async (data: CategoryFormValues) => {
 };
 
 export const editCategory = async (data: CategoryFormValues, id:string) => {
-    console.log("edit currency", data);
+    
     try {
        await prisma.category.update({
           where:{

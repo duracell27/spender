@@ -93,9 +93,6 @@ const UserTransactionForm = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false); // Контроль видимості діалогу
 
-  console.log("активний гаманець", userSettings?.activeWalletId);
-  // console.log('гаманець', wallets)
-
   // створюю обєкт форми з для реакт хук форм
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
@@ -108,8 +105,6 @@ const UserTransactionForm = ({
       form.setValue("walletId", userSettings.activeWalletId);
     }
   }
-
-  console.log("значення форми", form.getValues());
 
   //обробка відправки форми
   async function onSubmit(data: TransactionFormValues) {
@@ -217,7 +212,10 @@ const UserTransactionForm = ({
                   <FormItem>
                     <FormLabel>Тип транзакції</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
+                      onValueChange={(value)=>{field.onChange(value)
+                       
+                         form.resetField('categoryId')
+                      }}
                       defaultValue={edit ? data?.transactionType : field.value}
                     >
                       <FormControl>
@@ -265,7 +263,7 @@ const UserTransactionForm = ({
                       <SelectContent>
                         {categories.map((category, index) => {
                           if (
-                            initType === "DEBIT" &&
+                             form.getValues().transactionType === "DEBIT" &&
                             category.categoryType === "INCOME"
                           ) {
                             return (
@@ -274,7 +272,7 @@ const UserTransactionForm = ({
                               </SelectItem>
                             );
                           } else if (
-                            initType === "CREDIT" &&
+                            form.getValues().transactionType === "CREDIT" &&
                             category.categoryType === "SPENDING"
                           ) {
                             return (

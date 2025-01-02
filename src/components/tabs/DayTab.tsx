@@ -17,6 +17,7 @@ import {
 import { auth } from "../../../auth";
 import UserTransactionForm from "../forms/UserTransactionForm";
 import { Category, UserSettings, Wallet } from "@prisma/client";
+// import { console } from "inspector";
 
 const DayTab = async ({
   wallets,
@@ -30,8 +31,10 @@ const DayTab = async ({
   const session = await auth();
   if (!session?.user.id) return;
 
+  
+
   const { transactions, startDate } = await getTransactionsByPeriod("day", userSettings.activeWalletId);
-  const { balance, creditSum, debitSum } = calculateBalanceAndSums(transactions);
+  const { balance, creditSum, debitSum } = calculateBalanceAndSums(wallets, userSettings.activeWalletId);
 
   return (
     <div>

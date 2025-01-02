@@ -38,7 +38,7 @@ export function  ActiveWalletSelect({wallets, userSettings}:{wallets: Wallet[], 
   })
 
   async function onSubmit(data: ActiveWalletSchema) {
-    console.log(data)
+    
     try {
         await editUserSettings(data, userSettings.id)
     } catch (error) {

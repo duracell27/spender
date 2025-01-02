@@ -15,6 +15,7 @@ enum Role {
 enum CategoryType {
   SPENDING
   INCOME
+  INIT
 }
 
 enum TransactionType {
@@ -121,6 +122,8 @@ model Wallet {
   currencyId         String        @db.ObjectId
   currency           Currency      @relation(fields: [currencyId], references: [id], onDelete: Cascade)
   balance            Int           @default(0)
+  debitSum           Int           @default(0)
+  creditSum          Int           @default(0)
   transactions       Transaction[]
   initialBalance     Int           @default(0)
   initialBalanceDate DateTime      @default(now())

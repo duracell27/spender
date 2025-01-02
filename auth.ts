@@ -25,35 +25,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             // Додайте тут будь-які поля, які вам потрібні
           },
         });
+        await prisma.category.create({
+          data: {
+            name: "Початкове внесення",
+            categoryType: "INIT",
+            userId: user.id,
+          },
+        });
       }
     }
   }
-  // callbacks: {
-  //   async signIn({user}) {
-  //     return user
-  //     // if (user.email) {
-  //       // try {
-  //       //   const existingUser = await prisma.user.findUnique({
-  //       //     where: { email: user.email },
-  //       //   });
-
-  //       //   if (!existingUser) {
-  //       //     // Якщо користувача немає, створюємо додаткові дані
-  //       //     await prisma.userSettings.create({
-  //       //       data: {
-  //       //         userId: user.id,
-  //       //         // Ваші початкові налаштування
-  //       //       },
-  //       //     });
-  //       //     console.log("Додаткові дії виконані для нового користувача:", user);
-  //       //   }
-
-  //       //   return true; // Дозволяємо авторизацію
-  //       // } catch (error) {
-  //       //   console.error("Помилка при створенні додаткових даних:", error);
-  //       //   return false; // Забороняємо авторизацію в разі помилки
-  //       // }
-  //     // }
-  //   },
-  // },
 });

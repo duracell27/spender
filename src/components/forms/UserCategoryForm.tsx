@@ -36,7 +36,7 @@ import { addCategory, editCategory } from "@/actions/categories";
 // створення схеми через зод
 const categorySchema = z.object({
   name: z.string().min(1, "Назва категорії обов'язкова"),
-  categoryType: z.enum(['SPENDING', 'INCOME'])
+  categoryType: z.enum(['SPENDING', 'INCOME', "INIT"])
 });
 
 // створення типів на основі схеми

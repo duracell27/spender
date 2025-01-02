@@ -32,10 +32,10 @@ const DayTab = async ({
 }) => {
   const session = await auth();
   if (!session?.user.id) return;
+
   const {transactions, startDate} = await getTransactionsByPeriod("month", userSettings.activeWalletId);
 
-  const { balance, creditSum, debitSum } =
-    calculateBalanceAndSums(transactions);
+  const { balance, creditSum, debitSum } = calculateBalanceAndSums(wallets, userSettings.activeWalletId);
 
   return (
     <div>
