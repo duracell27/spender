@@ -6,7 +6,7 @@ import React from "react";
 const DashBoardMenu = () => {
   const pathname = usePathname();
   return (
-    <div className="flex flex-col gap-4 px-4">
+    <div className="flex sm:flex-col flex-row  gap-4 px-4 flex-wrap">
       <Link href="/dashboard">
         <div
           className={`${

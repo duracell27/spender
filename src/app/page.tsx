@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { devlog } from "@/lib/devlog";
 
 export default async function Home() {
   return (
@@ -14,12 +15,21 @@ export default async function Home() {
       <p>Тут буде головна сторінка</p>
 
       <Dialog>
-        <DialogTrigger asChild><Button>v 0.1</Button></DialogTrigger>
+        <DialogTrigger asChild>
+          <Button>v 0.1</Button>
+        </DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Оновлення по застосунку</DialogTitle>
             <DialogDescription>
-              <strong className="">0.1 </strong><span>Вихід 1 версії бета</span>
+            {devlog.map((item, index) => (
+                <span key={index} className="block">
+                  <strong className="font-bold text-foreground">
+                    {item.version}{" "}
+                  </strong>
+                  <span>{item.description}</span>
+                </span>
+              ))}
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

@@ -3,7 +3,7 @@ import React from 'react'
 
 const DashboardLayout = ({children}: {children: React.ReactNode}) => {
   return (
-    <div className='flex gap-x-4'>
+    <div className='flex gap-x-4 flex-wrap'>
         <div className="">
             <DashBoardMenu/>
         </div>

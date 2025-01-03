@@ -43,18 +43,9 @@ const TransactionPage = async () => {
 
   return (
     <div className="p-4">
-
       {userSettings?.id && (<ActiveWalletSelect wallets={wallets} userSettings={userSettings}/>)}
-
-
-
-
-      <DashboardTabs wallets={wallets} categories={categories} userSettings={userSettings}/>
-
       
-
-
-
+      <DashboardTabs wallets={wallets} categories={categories} userSettings={userSettings}/>
     </div>
   );
 };
