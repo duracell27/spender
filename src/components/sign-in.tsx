@@ -8,7 +8,7 @@ export default function SignIn({provider, providerAlias}: {provider: string, pro
     className="w-full"
       action={async () => {
         "use server"
-        await signIn(provider, {redirectTo: '/dashboard'})
+        await signIn(provider, {redirectTo: '/dashboard/transactions'})
       }}
     >
       <Button className="w-full" type="submit">{providerAlias}</Button>

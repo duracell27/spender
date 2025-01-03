@@ -5,6 +5,9 @@ import { prisma } from "../../prisma/prisma";
 import { WalletFormValues } from "@/components/forms/UserWaletForm";
 import { auth } from "../../auth";
 
+// працюємо з рахуноком
+
+// додаємо рахунок на базі даних з форми, та встановлюмо початкові баланси якщо вони є
 export const addWallet = async (data: WalletFormValues) => {
   const session = await auth();
   if (!session?.user.id) return;
@@ -35,6 +38,8 @@ export const addWallet = async (data: WalletFormValues) => {
         userId: session.user.id,
       },
     });
+
+    // створюмо транзакцію на основі початкових в несень
 
     if (initCategory?.id) {
       if (data.initialBalance > 0) {
@@ -72,6 +77,8 @@ export const addWallet = async (data: WalletFormValues) => {
   revalidatePath("/dashboard/wallets");
 };
 
+// редагумо рахунок на базі даних з форми та ід самого рахунку
+
 export const editWallet = async (data: WalletFormValues, id: string) => {
   try {
     await prisma.wallet.update({
@@ -87,6 +94,9 @@ export const editWallet = async (data: WalletFormValues, id: string) => {
   revalidatePath("/dashboard/wallets");
 };
 
+// видаляємо рахунок з бази даних на базі ід гаманця
+// видалямо всі транзакції з цього рахунку
+// міняємо в юзер сетінгах ід all
 export const deleteWallet = async (id: string) => {
   const session = await auth();
   if (!session?.user.id) return;

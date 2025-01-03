@@ -23,6 +23,8 @@ import {ActiveWalletSchema} from '@/components/forms/UserDashboardWaletSelect'
 //   revalidatePath("/dashboard");
 // };
 
+
+// оновлямо налаштування користувача на базі даних з форми та ід самого користувача
 export const editUserSettings = async (data: ActiveWalletSchema, id:string) => {
   // const session = await auth();
   //   if (!session?.user.id) return;

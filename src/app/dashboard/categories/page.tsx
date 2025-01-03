@@ -51,9 +51,9 @@ const CategoriesPage = async () => {
               <TableCell>
                 {category.categoryType === "SPENDING" ? (
                   <span className="text-red-500 font-bold">Витрата</span>
-                ) : (
+                ) : category.categoryType === "INCOME" ? (
                   <span className="text-green-500 font-bold">Дохід</span>
-                )}
+                ):(<span className="text-gray-500 font-bold">Внесення</span>)}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">

@@ -3,6 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "../../prisma/prisma";
 
+// робота з валютами
+
+// створюмо валюту на базі даних з форми
 export const addCurrency = async (data: {
   name: string;
   code: string;
@@ -24,6 +27,7 @@ export const addCurrency = async (data: {
   revalidatePath("/adminPanel/currency");
 };
 
+// редагуємо валюту на базі даних та ід самої валюти
 export const editCurrency = async (data: {
   name: string;
   code: string;
@@ -48,8 +52,8 @@ export const editCurrency = async (data: {
   revalidatePath("/adminPanel/currency");
 };
 
+// видаляємо валюту, ід самої валюти
 export const deleteCurrency = async (id:string) => {
-  
   try {
      await prisma.currency.delete({
         where:{

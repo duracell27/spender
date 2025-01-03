@@ -18,6 +18,17 @@ const DashBoardMenu = () => {
           Головна
         </div>
       </Link>
+      <Link href="/dashboard/transactions">
+        <div
+          className={`${
+            pathname === "/dashboard/transactions"
+              ? "bg-muted-foreground text-background"
+              : "bg-accent"
+          } flex  gap-2 items-center p-2 rounded-md hover:bg-foreground hover:text-background`}
+        >
+          Транзакції
+        </div>
+      </Link>
       <Link href="/dashboard/categories">
         <div
           className={`${
