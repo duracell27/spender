@@ -249,7 +249,7 @@ export async function getTransactionsByPeriod(
 
   const transactions = await prisma.transaction.findMany({
     where: {
-      createdAt: {
+      date: {
         gte: startDate,
         lte: endDate,
       },
@@ -259,6 +259,9 @@ export async function getTransactionsByPeriod(
     include: {
       category: true,
       wallet: true, // Пов’язана категорія, якщо потрібно
+    },
+    orderBy: {
+      date: "desc", // Використовуємо поле date і сортуємо за спаданням (desc) або зростанням (asc)
     },
   });
 

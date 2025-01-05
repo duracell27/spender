@@ -48,18 +48,18 @@ const DayTab = async ({
       <div className="font-bold text-center my-4 text-2xl">
         {format(startDate, "dd MMMM", { locale: uk })}
       </div>
-      <div className="flex justify-evenly ">
-        <div className="text-green-500 p-3 px-5 bg-green-200 rounded-full">Прибуток {debitSum}</div>
+      <div className="flex justify-evenly text-xs sm:text-sm">
+        <div className="text-green-500 p-3 px-3 sm:px-5 bg-green-200 rounded-full">Прибуток {debitSum}</div>
         <div
           className={
             balance >= 0
-              ? "text-green-500 p-3 px-5 bg-green-200 rounded-full"
-              : "text-red-500 p-3 px-5 bg-red-200 rounded-full"
+              ? "text-green-500 p-3 px-3 sm:px-5 bg-green-200 rounded-full"
+              : "text-red-500 p-3 px-3 sm:px-5 bg-red-200 rounded-full"
           }
         >
           Баланс {balance}
         </div>
-        <div className="text-red-500 p-3 px-5 bg-red-200 rounded-full">Витрати {creditSum}</div>
+        <div className="text-red-500 p-3 px-3 sm:px-5 bg-red-200 rounded-full">Витрати {creditSum}</div>
       </div>
 
       <div className="flex items-center gap-4 my-4 justify-center">
@@ -80,7 +80,7 @@ const DayTab = async ({
       </div>
 
       <div className="">
-        <Table>
+        <Table className="text-[8px] sm:text-sm">
           <TableCaption className="caption-top font-bold">Лист транзакцій</TableCaption>
           <TableHeader>
             <TableRow>
@@ -92,13 +92,13 @@ const DayTab = async ({
               <TableHead className="text-right">Дії</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="text-[8px]">
+          <TableBody className="text-[8px] sm:text-sm">
             {transactions.map((transaction) => (
               <TableRow
-                className={transaction.transactionType === "DEBIT" ? "bg-green-200" : "bg-red-200 "}
+                className={transaction.transactionType === "DEBIT" ? "bg-green-400 text-background" : "bg-red-400 text-background"}
                 key={transaction.id}
               >
-                <TableCell>{format(transaction.date, "dd.MM.yyyy", { locale: uk })}</TableCell>
+                <TableCell>{format(transaction.date, "dd.MM", { locale: uk })}</TableCell>
                 <TableCell>{transaction.title}</TableCell>
                 <TableCell>{transaction.amount}</TableCell>
                 <TableCell className="font-medium">{transaction.category.name}</TableCell>
@@ -126,7 +126,7 @@ const DayTab = async ({
                   </div>
                   <div className="block sm:hidden">
                     <Dialog>
-                      <DialogTrigger><PanelRightClose /></DialogTrigger>
+                      <DialogTrigger><PanelRightClose className="size-3"/></DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>Видалити чи редагувати?</DialogTitle>

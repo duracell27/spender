@@ -6,14 +6,14 @@ import React from "react";
 const DashBoardMenu = () => {
   const pathname = usePathname();
   return (
-    <div className="flex sm:flex-col flex-row  gap-4 px-4 flex-wrap">
+    <div className="flex sm:flex-col flex-row  gap-2 px-4 flex-wrap text-xs sm:text-sm">
       <Link href="/dashboard">
         <div
           className={`${
             pathname === "/dashboard"
               ? "bg-muted-foreground text-background"
               : "bg-accent"
-          } flex  gap-2 items-center p-2 rounded-md hover:bg-foreground hover:text-background`}
+          } flex  gap-2 items-center p-1 rounded-md hover:bg-foreground hover:text-background`}
         >
           Головна
         </div>
@@ -24,7 +24,7 @@ const DashBoardMenu = () => {
             pathname === "/dashboard/transactions"
               ? "bg-muted-foreground text-background"
               : "bg-accent"
-          } flex  gap-2 items-center p-2 rounded-md hover:bg-foreground hover:text-background`}
+          } flex  gap-2 items-center p-1 rounded-md hover:bg-foreground hover:text-background`}
         >
           Транзакції
         </div>
@@ -35,7 +35,7 @@ const DashBoardMenu = () => {
             pathname === "/dashboard/categories"
               ? "bg-muted-foreground text-background"
               : "bg-accent"
-          } flex  gap-2 items-center p-2 rounded-md hover:bg-foreground hover:text-background`}
+          } flex  gap-2 items-center p-1 rounded-md hover:bg-foreground hover:text-background`}
         >
           Категорії
         </div>
@@ -46,7 +46,7 @@ const DashBoardMenu = () => {
             pathname === "/dashboard/wallets"
               ? "bg-muted-foreground text-background"
               : "bg-accent"
-          } flex  gap-2 items-center p-2 rounded-md hover:bg-foreground hover:text-background`}
+          } flex  gap-2 items-center p-1 rounded-md hover:bg-foreground hover:text-background`}
         >
           Рахунки
         </div>
@@ -57,7 +57,7 @@ const DashBoardMenu = () => {
             pathname === "/dashboard/currencies"
               ? "bg-muted-foreground text-background"
               : "bg-accent"
-          } flex  gap-2 items-center p-2 rounded-md hover:bg-foreground hover:text-background`}
+          } flex  gap-2 items-center p-1 rounded-md hover:bg-foreground hover:text-background`}
         >
           Валюти
         </div>
