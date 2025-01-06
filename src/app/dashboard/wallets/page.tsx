@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatDigits } from "@/lib/utils";
 
 const WaletsPage = async () => {
   const currencys = await prisma.currency.findMany();
@@ -47,7 +48,7 @@ const WaletsPage = async () => {
             <TableRow key={wallet.id}>
               <TableCell className="font-medium">{wallet.name}</TableCell>
               <TableCell>
-                {wallet.balance} {wallet.currency.symbol}
+                {formatDigits( wallet.balance)} {wallet.currency.symbol}
               </TableCell>
 
               <TableCell className="text-right">

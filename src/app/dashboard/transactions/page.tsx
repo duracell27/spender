@@ -8,6 +8,7 @@ import DashboardTabs from "@/components/tabs/DashboardTabs";
 import { ActiveWalletSelect } from "@/components/forms/UserDashboardWaletSelect";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+// import { Currency, UserSettings } from "@prisma/client";
 // import DashboardWrapper from "@/components/DashboardWrapper";
 
 const TransactionPage = async () => {
@@ -27,7 +28,10 @@ const TransactionPage = async () => {
     where: {
       userId: session.user.id,
     },
-  });
+    include: {
+      defaultCurrency: true,
+    },
+  }) 
 
   if (!userSettings?.id) return null
 

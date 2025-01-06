@@ -46,6 +46,7 @@ model User {
   wallets       Wallet[]
   categories    Category[]
   transactions  Transaction[]
+  exchangeRates ExchangeRate[]
 
   Authenticator Authenticator[]
 
@@ -62,7 +63,10 @@ model UserSettings {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   activeWalletId String @default("all")
+
   defaultCurrencyId String @db.ObjectId
+  defaultCurrency Currency @relation(fields: [defaultCurrencyId], references: [id], onDelete: Cascade)
+
   defaultPeriod Period @default(MONTH)
   defaultLanguage Language @default(UA)
 
@@ -153,6 +157,9 @@ model Currency {
   symbol String @unique
 
   wallets Wallet[]
+  userSettings UserSettings[]
+  exchangeRates ExchangeRate[] @relation("FirstCurrency")
+  exchangeRates2 ExchangeRate[] @relation("SecondCurrency")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -187,6 +194,25 @@ model Transaction {
 
   categoryId String   @db.ObjectId
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model ExchangeRate {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId     String   @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date       DateTime @default(now())
+
+  firstCurrencyId String   @db.ObjectId
+  currency1       Currency @relation("FirstCurrency", fields: [firstCurrencyId], references: [id], onDelete: Cascade)
+
+  rate       Float
+
+  secondCurrencyId String   @db.ObjectId
+  currency2        Currency @relation("SecondCurrency", fields: [secondCurrencyId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

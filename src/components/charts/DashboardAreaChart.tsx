@@ -24,7 +24,7 @@ type NameType = string; // Тип для назв
 const CustomTooltip: React.FC<TooltipProps<ValueType, NameType>> = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white shadow-md p-2 rounded">
+      <div className="border-foreground border shadow-md p-2 rounded bg-background text-foreground">
         <p className="text-sm font-bold">{`День: ${label}`}</p>
         <p className="text-sm">{`Сума: ${payload[0].value}`}</p>
       </div>

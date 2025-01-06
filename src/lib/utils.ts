@@ -32,4 +32,10 @@ export function calculateBalanceAndSums(wallets: Wallet[], activeWalletId: strin
   }
 }
 
-
+export function formatDigits(amount: number) {
+  const formatter = new Intl.NumberFormat('uk-UA', {
+    minimumFractionDigits: 0, // Мінімум десяткових знаків
+    maximumFractionDigits: 2, // Максимум два десяткових знаки
+  });
+  return formatter.format(amount);
+}

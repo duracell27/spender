@@ -4,32 +4,32 @@ import DayTab from "./DayTab";
 import WeekTab from "./WeekTab";
 import MonthTab from "./MonthTab";
 import YearTab from "./YearTab";
-import { Category, UserSettings, Wallet } from "@prisma/client";
+import { Category, Currency, UserSettings, Wallet } from "@prisma/client";
 
-
-const DashboardTabs = ({wallets, categories, userSettings}: {wallets: Wallet[], categories: Category[], userSettings: UserSettings}) => {
+const DashboardTabs = ({wallets, categories, userSettings}: {wallets: Wallet[], categories: Category[], userSettings: UserSettings & {defaultCurrency: Currency}}) => {
+  
   return (
     <div className="flex justify-center ">
-      <Tabs defaultValue="month" className="flex-1">
+      <Tabs defaultValue={userSettings.defaultPeriod} className="flex-1">
         <TabsList className="flex gap-2">
-          <TabsTrigger value="day">День</TabsTrigger>
-          <TabsTrigger value="week">Тиждень</TabsTrigger>
-          <TabsTrigger value="month">Місяць</TabsTrigger>
-          <TabsTrigger value="year">Рік</TabsTrigger>
+          <TabsTrigger value="DAY">День</TabsTrigger>
+          <TabsTrigger value="WEEK">Тиждень</TabsTrigger>
+          <TabsTrigger value="MONTH">Місяць</TabsTrigger>
+          <TabsTrigger value="YEAR">Рік</TabsTrigger>
         </TabsList>
 
         
 
-        <TabsContent value="day">
+        <TabsContent value="DAY">
           <DayTab wallets={wallets} categories={categories} userSettings={userSettings}/>
         </TabsContent>
-        <TabsContent value="week">
+        <TabsContent value="WEEK">
           <WeekTab wallets={wallets} categories={categories} userSettings={userSettings}/>
         </TabsContent>
-        <TabsContent value="month">
+        <TabsContent value="MONTH">
           <MonthTab wallets={wallets} categories={categories} userSettings={userSettings}/>
         </TabsContent>
-        <TabsContent value="year">
+        <TabsContent value="YEAR">
           <YearTab wallets={wallets} categories={categories} userSettings={userSettings}/>
         </TabsContent>
       </Tabs>
