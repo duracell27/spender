@@ -63,16 +63,11 @@ const DayTab = async ({
         firstCurrencyId: userSettings.defaultCurrencyId,
         secondCurrencyId: currency.id,
       },
-      orderBy:{
-        date: "desc"
-      }
-      
+      orderBy: {
+        date: "desc",
+      },
     });
   }
-
-  console.log("чи відрізняться валюти", currency.id !== userSettings.defaultCurrencyId);
-  console.log("що в обмінах", exchanges);
-  // console.log("usersettings", userSettings);
 
   return (
     <div>

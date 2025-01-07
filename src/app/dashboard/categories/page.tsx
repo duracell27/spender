@@ -22,6 +22,11 @@ const CategoriesPage = async () => {
     where: {
       userId: session.user.id,
     },
+    orderBy: [
+      {categoryType: "asc"},
+      {name: "asc"}
+    ]
+    
   });
 
   return (

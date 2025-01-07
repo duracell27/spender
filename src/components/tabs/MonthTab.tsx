@@ -1,10 +1,7 @@
 import React from "react";
 import { PanelRightClose, Pencil, Trash2 } from "lucide-react";
 import Confirm from "@/components/Confirm";
-import {
-  deleteTransaction,
-  getTransactionsByPeriod,
-} from "@/actions/transactions";
+import { deleteTransaction, getTransactionsByPeriod } from "@/actions/transactions";
 import { calculateBalanceAndSums, formatDigits } from "@/lib/utils";
 import { format } from "date-fns";
 import { uk } from "date-fns/locale";
@@ -27,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { auth } from "../../../auth";
 import UserTransactionForm from "../forms/UserTransactionForm";
-import { Category, UserSettings, Wallet } from "@prisma/client";
+import { Category, Currency, ExchangeRate, UserSettings, Wallet } from "@prisma/client";
 import { prisma } from "../../../prisma/prisma";
 
 const DayTab = async ({
@@ -37,12 +34,12 @@ const DayTab = async ({
 }: {
   wallets: Wallet[];
   categories: Category[];
-  userSettings: UserSettings;
+  userSettings: UserSettings & { defaultCurrency: Currency };
 }) => {
   const session = await auth();
   if (!session?.user.id) return;
 
-  const {transactions, startDate} = await getTransactionsByPeriod("month", userSettings.activeWalletId);
+  const { transactions, startDate } = await getTransactionsByPeriod("month", userSettings.activeWalletId);
 
   const { balance, creditSum, debitSum } = calculateBalanceAndSums(wallets, userSettings.activeWalletId);
 
@@ -55,6 +52,22 @@ const DayTab = async ({
       },
     },
   });
+  if (!currency) return null;
+
+  let exchanges: ExchangeRate | null = {} as ExchangeRate;
+
+  if (currency.id !== userSettings.defaultCurrencyId) {
+    exchanges = await prisma.exchangeRate.findFirst({
+      where: {
+        userId: session.user.id,
+        firstCurrencyId: userSettings.defaultCurrencyId,
+        secondCurrencyId: currency.id,
+      },
+      orderBy: {
+        date: "desc",
+      },
+    });
+  }
 
   return (
     <div>
@@ -62,7 +75,19 @@ const DayTab = async ({
         {format(startDate, "LLLL", { locale: uk })}
       </div>
       <div className="flex justify-evenly text-xs sm:text-sm">
-        <div className="text-green-500 p-3 px-3 sm:px-5 bg-green-200 rounded-full">Прибуток {formatDigits( debitSum)} {currency?.symbol}</div>
+        <div className="text-green-500 p-3 px-3 sm:px-5 bg-green-200 rounded-full">
+          Прибуток {formatDigits(debitSum)} {currency?.symbol}
+          {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
+            <p>Курс не задано</p>
+          ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
+            <p className="text-center text-xs">
+              {formatDigits(exchanges.rate * debitSum)}
+              {userSettings.defaultCurrency.symbol}
+            </p>
+          ) : (
+            ""
+          )}
+        </div>
         <div
           className={
             balance >= 0
@@ -70,14 +95,48 @@ const DayTab = async ({
               : "text-red-500 p-3 px-3 sm:px-5 bg-red-200 rounded-full"
           }
         >
-          Баланс {formatDigits( balance)} {currency?.symbol}
+          Баланс {formatDigits(balance)} {currency?.symbol}
+          {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
+            <p>Курс не задано</p>
+          ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
+            <p className="text-center text-xs">
+              {formatDigits(exchanges.rate * balance)}
+              {userSettings.defaultCurrency.symbol}
+            </p>
+          ) : (
+            ""
+          )}
         </div>
-        <div className="text-red-500 p-3 px-3 sm:px-5 bg-red-200 rounded-full">Витрати {formatDigits( creditSum)} {currency?.symbol}</div>
+        <div className="text-red-500 p-3 px-3 sm:px-5 bg-red-200 rounded-full">
+          Витрати {formatDigits(creditSum)} {currency?.symbol}
+          {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
+            <p>Курс не задано</p>
+          ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
+            <p className="text-center text-xs">
+              {formatDigits(exchanges.rate * creditSum)}
+              {userSettings.defaultCurrency.symbol}
+            </p>
+          ) : (
+            ""
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-4 my-4 justify-center">
-        <UserTransactionForm title="Дохід" initType="DEBIT" wallets={wallets} categories={categories} userSettings={userSettings}/>
-        <UserTransactionForm title="Витрата" initType="CREDIT" wallets={wallets} categories={categories} userSettings={userSettings}/>
+        <UserTransactionForm
+          title="Дохід"
+          initType="DEBIT"
+          wallets={wallets}
+          categories={categories}
+          userSettings={userSettings}
+        />
+        <UserTransactionForm
+          title="Витрата"
+          initType="CREDIT"
+          wallets={wallets}
+          categories={categories}
+          userSettings={userSettings}
+        />
       </div>
 
       <div className="">
@@ -96,16 +155,22 @@ const DayTab = async ({
           <TableBody>
             {transactions.map((transaction) => (
               <TableRow
-                className={transaction.transactionType === "DEBIT" ? "bg-green-400 text-background" : "bg-red-400 text-background"}
+                className={
+                  transaction.transactionType === "DEBIT"
+                    ? "bg-green-400 text-background"
+                    : "bg-red-400 text-background"
+                }
                 key={transaction.id}
               >
                 <TableCell>{format(transaction.date, "dd.MM", { locale: uk })}</TableCell>
                 <TableCell>{transaction.title}</TableCell>
-                <TableCell>{formatDigits(transaction.amount)} {currency?.symbol}</TableCell>
+                <TableCell>
+                  {formatDigits(transaction.amount)} {currency?.symbol}
+                </TableCell>
                 <TableCell className="font-medium">{transaction.category.name}</TableCell>
                 <TableCell className="font-medium">{transaction.wallet.name}</TableCell>
                 <TableCell className="text-right">
-                <div className="hidden sm:block">
+                  <div className="hidden sm:block">
                     <div className="flex justify-end gap-2">
                       <UserTransactionForm
                         title={<Pencil />}
@@ -127,7 +192,9 @@ const DayTab = async ({
                   </div>
                   <div className="block sm:hidden">
                     <Dialog>
-                      <DialogTrigger><PanelRightClose className="size-3" /></DialogTrigger>
+                      <DialogTrigger>
+                        <PanelRightClose className="size-3" />
+                      </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>Видалити чи редагувати?</DialogTitle>

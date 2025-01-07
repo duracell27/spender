@@ -23,6 +23,9 @@ const TransactionPage = async () => {
     where: {
       userId: session.user.id,
     },
+    orderBy:{
+      name: 'asc'
+    }
   });
   const userSettings = await prisma.userSettings.findUnique({
     where: {
