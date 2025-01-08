@@ -311,3 +311,48 @@ export async function getMonthlyExpenses(
 
   return data;
 }
+
+export async function getMonthlyExpensesByCategory(userId: string, month: number, year: number) {
+  const startDate = new Date(year, month - 1, 1); // Початок місяця
+  const endDate = new Date(year, month, 0, 23, 59, 59, 999); // Кінець місяця
+
+  const transactions = await prisma.transaction.groupBy({
+    by: ['categoryId'],
+    where: {
+      userId,
+      transactionType: 'CREDIT',
+      date: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+    _sum: {
+      amount: true,
+    },
+  });
+
+  const categories = await prisma.category.findMany({
+    where: {
+      id: {
+        in: transactions.map((t) => t.categoryId),
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  const data = transactions.map((transaction) => {
+    const category = categories.find((cat) => cat.id === transaction.categoryId);
+    return {
+      catName: category?.name || 'Unknown',
+      sum: transaction._sum.amount || 0,
+    };
+  });
+
+  // Сортуємо дані за спаданням суми витрат
+  data.sort((a, b) => b.sum - a.sum);
+
+  return data;
+}

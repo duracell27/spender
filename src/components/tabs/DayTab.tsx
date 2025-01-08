@@ -43,7 +43,16 @@ const DayTab = async ({
   const { transactions, startDate } = await getTransactionsByPeriod("day", userSettings.activeWalletId);
   const { balance, creditSum, debitSum } = calculateBalanceAndSums(wallets, userSettings.activeWalletId);
 
-  const currency = await prisma.currency.findFirst({
+  let currency;
+
+if (userSettings.activeWalletId === "all") {
+  currency = await prisma.currency.findFirst({
+    where: {
+      id: userSettings.defaultCurrencyId,
+    },
+  });
+} else {
+  currency = await prisma.currency.findFirst({
     where: {
       wallets: {
         some: {
@@ -52,6 +61,8 @@ const DayTab = async ({
       },
     },
   });
+}
+
   if (!currency) return null;
 
   let exchanges: ExchangeRate | null = {} as ExchangeRate;
