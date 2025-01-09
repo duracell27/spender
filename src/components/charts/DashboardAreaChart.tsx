@@ -1,5 +1,5 @@
 "use client";
-import { UserSettings } from "@prisma/client";
+import { Currency, UserSettings } from "@prisma/client";
 import React from "react";
 import {
   XAxis,
@@ -22,12 +22,16 @@ type DataType = {
 type ValueType = number | string  // Дозволені типи значень
 type NameType = string; // Тип для назв
 
-const CustomTooltip: React.FC<TooltipProps<ValueType, NameType>> = ({ active, payload, label }) => {
+interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
+  cyrSymbol: string;
+}
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, cyrSymbol }) => {
   if (active && payload && payload.length) {
     return (
       <div className="border-foreground border shadow-md p-2 rounded bg-background text-foreground">
         <p className="text-sm font-bold">{`День: ${label}`}</p>
-        <p className="text-sm">{`Сума: ${payload[0].value}`}</p>
+        <p className="text-sm">{`Сума: ${payload[0].value} ${cyrSymbol}`}</p>
       </div>
     );
   }
@@ -42,7 +46,7 @@ const DashboardAreaChart = ({
 }: {
   data: DataType[];
   color: string;
-  userSettings: UserSettings
+  userSettings: UserSettings & {defaultCurrency: Currency}
 }) => {
   return (
     
@@ -60,7 +64,7 @@ const DashboardAreaChart = ({
           <XAxis dataKey="day" />
           <YAxis />
           <CartesianGrid strokeDasharray="3 3" />
-          <Tooltip content={<CustomTooltip/>}/>
+          <Tooltip content={<CustomTooltip cyrSymbol={userSettings.defaultCurrency.symbol}/>}/>
           <Area
             type="monotone"
             dataKey="value"

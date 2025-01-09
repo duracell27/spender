@@ -7,7 +7,6 @@ import {
   CartesianGrid,
   Tooltip,
   Bar,
-  Legend,
   BarChart,
   ResponsiveContainer,
   TextProps
