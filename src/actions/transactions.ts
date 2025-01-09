@@ -14,6 +14,7 @@ import {
   startOfYear,
   endOfYear,
 } from "date-fns";
+import { formatDigits } from "@/lib/utils";
 
 // Робота з транзакціями
 
@@ -312,6 +313,7 @@ export async function getMonthlyExpenses(
   return data;
 }
 
+//дістаємо дані для графіка сума по категорії
 export async function getMonthlyExpensesByCategory(userId: string, month: number, year: number) {
   const startDate = new Date(year, month - 1, 1); // Початок місяця
   const endDate = new Date(year, month, 0, 23, 59, 59, 999); // Кінець місяця
@@ -356,3 +358,70 @@ export async function getMonthlyExpensesByCategory(userId: string, month: number
 
   return data;
 }
+
+//дістаємо дані для графіка мак мін вистрати і середні
+export interface MonthlyInfoData {
+  maxExpense: { title: string; amount: string } | null;
+  maxIncome: { title: string; amount: string } | null;
+  averageDailyExpense: number;
+  averageDailyIncome: number;
+}
+
+export const getMonthlyInfoData = async (
+  userId: string,
+  month: number,
+  year: number
+): Promise<MonthlyInfoData> => {
+  // Calculate the start and end dates for the given month
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0); // Last day of the month
+
+  // Get all transactions for the specified user and date range
+  const transactions = await prisma.transaction.findMany({
+    where: {
+      userId,
+      date: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+  });
+
+  // Filter transactions into expenses and incomes
+  const expenses = transactions.filter((t) => t.transactionType === 'CREDIT');
+  const incomes = transactions.filter((t) => t.transactionType === 'DEBIT');
+
+  // Calculate the maximum expense
+  const maxExpense = expenses.length
+    ? expenses.reduce((max, t) => (t.amount > max.amount ? t : max))
+    : null;
+
+  // Calculate the maximum income
+  const maxIncome = incomes.length
+    ? incomes.reduce((max, t) => (t.amount > max.amount ? t : max))
+    : null;
+
+  // Calculate the average daily expense (up to today's day)
+  const today = new Date();
+  const currentDay = today.getFullYear() === year && today.getMonth() === month - 1
+    ? today.getDate()
+    : endDate.getDate();
+  const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
+  const averageDailyExpense = expenses.length ? totalExpense / currentDay : 0;
+
+  // Calculate the average daily income (for the whole month)
+  const totalIncome = incomes.reduce((sum, t) => sum + t.amount, 0);
+  const averageDailyIncome = incomes.length ? totalIncome / endDate.getDate() : 0;
+
+  return {
+    maxExpense: maxExpense
+      ? { title: maxExpense.title, amount: formatDigits(maxExpense.amount) }
+      : { title: '', amount: formatDigits(0) },
+    maxIncome: maxIncome
+      ? { title: maxIncome.title, amount: formatDigits(maxIncome.amount) }
+      : { title: '', amount: formatDigits(0) },
+    averageDailyExpense: +averageDailyExpense.toFixed(2),
+    averageDailyIncome: +averageDailyIncome.toFixed(2),
+  };
+};
+

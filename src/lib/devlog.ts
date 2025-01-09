@@ -1,5 +1,9 @@
 export const devlog = [
   {
+    version: "0.12",
+    description: "Додані курси валют, додані графіки",
+  },
+  {
     version: "0.1",
     description: "Запуск першої бета версії",
   },

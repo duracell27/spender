@@ -2,24 +2,40 @@
 import DashboardAreaChart from "@/components/charts/DashboardAreaChart";
 import React from "react";
 import { auth } from "../../../auth";
-import { getMonthlyExpenses, getMonthlyExpensesByCategory } from "@/actions/transactions";
+import { getMonthlyExpenses, getMonthlyExpensesByCategory, getMonthlyInfoData } from "@/actions/transactions";
 import DashboardBarChart from "@/components/charts/BarChart";
+import { prisma } from "../../../prisma/prisma";
+import DashboardChartBlocks from "@/components/DashboardChartBlocks";
 
 const DashboardPage = async () => {
 
   const session = await auth();
   if (!session?.user.id) return;
 
+  const userSettings = await prisma.userSettings.findUnique({
+    where: {
+      userId: session.user.id
+    },
+    include: {
+      defaultCurrency: true,
+    }}
+  )
+  if (!userSettings?.id) return null;
+
   const data = await getMonthlyExpenses(session.user.id, 1, 2025);
   const dataBars = await getMonthlyExpensesByCategory(session.user.id, 1, 2025);
+  const dataInfo = await getMonthlyInfoData(session.user.id, 1, 2025);
+
+console.log('info',dataInfo);
  
   return (
     <div>
       
       <div className="flex flex-col gap-4 w-full justify-top h-screen">
         <h2 className="text-xl font-bold text-center">Січень, 2025</h2>
-        <DashboardAreaChart data={data} color={"f34c38"} />
-        <DashboardBarChart data={dataBars} color={"f34c38"}/>
+        <DashboardAreaChart data={data} color={"f34c38"} userSettings={userSettings}/>
+        <DashboardBarChart data={dataBars} color={"f34c38"} userSettings={userSettings}/>
+        <DashboardChartBlocks data={dataInfo} userSettings={userSettings}/>
       </div>
     </div>
   );

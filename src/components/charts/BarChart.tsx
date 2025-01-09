@@ -1,5 +1,5 @@
 "use client";
-import { da } from "date-fns/locale";
+import { Currency, UserSettings } from "@prisma/client";
 import React from "react";
 import {
   XAxis,
@@ -9,7 +9,8 @@ import {
   Bar,
   Legend,
   BarChart,
-  ResponsiveContainer
+  ResponsiveContainer,
+  TextProps
 } from "recharts";
 import { TooltipProps } from 'recharts';
 
@@ -35,14 +36,42 @@ const CustomTooltip: React.FC<TooltipProps<ValueType, NameType>> = ({ active, pa
   return null;
 };
 
+// Define the custom label component props
+interface CustomLabelProps extends TextProps {
+    x?: number;
+    y?: number;
+    width?: number;
+    value?: number;
+    color: string;
+    curSymbol: string
+  }
+  
+  // Custom label component
+  const CustomLabel: React.FC<CustomLabelProps> = ({ x = 0, y = 0, width = 0, value, color, curSymbol }) => {
+    return (
+      <text
+        x={x + width / 2} // Center the label horizontally
+        y={y - 10}        // Position above the bar
+        fill={`#${color}`}  // Text color
+        textAnchor="middle"
+        dominantBaseline="middle"
+        className="font-bold"
+      >
+        {value} {curSymbol}
+      </text>
+    );
+  };
+
 const DashboardBarChart = ({
   data,
   color,
+  userSettings
 }: {
   data: DataType[];
   color: string;
+  userSettings: UserSettings & {defaultCurrency: Currency}
 }) => {
-  console.log("chart", data);
+  
   return (
     <ResponsiveContainer width="100%" height="30%">
     <BarChart width={730} height={250} data={data}>
@@ -61,7 +90,8 @@ const DashboardBarChart = ({
         stroke={`#${color}`}
         fillOpacity={1}
         fill="url(#color)"
-        label={{ fill: "red", fontSize: 20 }}
+        label={<CustomLabel color={color} curSymbol={userSettings.defaultCurrency.symbol
+        }/>}
       />
     </BarChart></ResponsiveContainer>
   );

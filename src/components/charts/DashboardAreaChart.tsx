@@ -1,4 +1,5 @@
 "use client";
+import { UserSettings } from "@prisma/client";
 import React from "react";
 import {
   XAxis,
@@ -37,9 +38,11 @@ const CustomTooltip: React.FC<TooltipProps<ValueType, NameType>> = ({ active, pa
 const DashboardAreaChart = ({
   data,
   color,
+  userSettings
 }: {
   data: DataType[];
   color: string;
+  userSettings: UserSettings
 }) => {
   return (
     
