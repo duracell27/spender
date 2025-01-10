@@ -27,6 +27,17 @@ const TransactionPage = async () => {
       name: 'asc'
     }
   });
+
+  const exchangeRates = await prisma.exchangeRate.findMany({
+    where: {
+      userId: session.user.id,
+    },
+    // include: {
+    //   currency1: true,
+    //   currency2: true,
+    // },
+  })
+
   const userSettings = await prisma.userSettings.findUnique({
     where: {
       userId: session.user.id,
@@ -52,7 +63,7 @@ const TransactionPage = async () => {
     <div className="p-4">
       {userSettings?.id && (<ActiveWalletSelect wallets={wallets} userSettings={userSettings}/>)}
       
-      <DashboardTabs wallets={wallets} categories={categories} userSettings={userSettings}/>
+      <DashboardTabs wallets={wallets} categories={categories} userSettings={userSettings} exchangeRates={exchangeRates}/>
     </div>
   );
 };

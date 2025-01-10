@@ -1,4 +1,4 @@
-import { Wallet } from "@prisma/client";
+import { ExchangeRate, Wallet } from "@prisma/client";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function calculateBalanceAndSums(wallets: Wallet[], activeWalletId: string) {
+export function calculateBalanceAndSums(wallets: Wallet[], activeWalletId: string, exchangeRates: ExchangeRate[]) {
   if (activeWalletId === "all") {
     // Сумуємо значення з усіх гаманців
     return wallets.reduce(

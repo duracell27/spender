@@ -50,8 +50,8 @@ interface CustomLabelProps extends TextProps {
     return (
       <text
         x={x + width / 2} // Center the label horizontally
-        y={y - 10}        // Position above the bar
-        fill={`#${color}`}  // Text color
+        y={y + 10}        // Position above the bar
+        fill={`#fff`}  // Text color
         textAnchor="middle"
         dominantBaseline="middle"
         className="font-bold"

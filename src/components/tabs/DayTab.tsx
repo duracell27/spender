@@ -32,16 +32,18 @@ const DayTab = async ({
   wallets,
   categories,
   userSettings,
+  exchangeRates
 }: {
   wallets: Wallet[];
   categories: Category[];
   userSettings: UserSettings & { defaultCurrency: Currency };
+  exchangeRates: ExchangeRate[];
 }) => {
   const session = await auth();
   if (!session?.user.id) return;
 
   const { transactions, startDate } = await getTransactionsByPeriod("day", userSettings.activeWalletId);
-  const { balance, creditSum, debitSum } = calculateBalanceAndSums(wallets, userSettings.activeWalletId);
+  const { balance, creditSum, debitSum } = calculateBalanceAndSums(wallets, userSettings.activeWalletId, exchangeRates);
 
   let currency;
 
