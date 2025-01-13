@@ -354,9 +354,9 @@ export async function getMonthlyExpensesByCategory(userId: string, month: number
   });
 
   // Сортуємо дані за спаданням суми витрат
-  data.sort((a, b) => b.sum - a.sum);
+  const top7 = data.sort((a, b) => b.sum - a.sum).slice(0, 7);
 
-  return data;
+  return top7;
 }
 
 //дістаємо дані для графіка мак мін вистрати і середні

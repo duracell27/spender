@@ -73,31 +73,47 @@ const CurrenciesPage = async () => {
             />
           </div>
 
-          {exchanges
-            .filter(
-              (item) =>
-                item.firstCurrencyId === userSettings.defaultCurrencyId &&
-                item.secondCurrencyId === currency.currency.id
-            )
-            .map((item) => (
-              <div key={item.id} className=" my-2 flex justify-between">
-                <p className="bg-foreground text-background flex items-center rounded-2xl px-2">
-                  1 {item.currency2.code} = {formatDigits(item.rate)} {item.currency1.code}{" "}
-                </p>
-                <p className="text-foreground">{format(item.date, "PP", { locale: uk })}</p>
-                <div className="flex items-center gap-2">
-                  <UserExchangeForm
-                    title={<Pencil />}
-                    firstCurrency={userSettings?.defaultCurrency}
-                    secondCurrency={currency.currency}
-                    edit={true}
-                    data={item}
-                    id={item.id}
-                  />
-                  <Confirm title={<Trash2 />} actionButtonTitle="Видалити" fn={deleteExchange} id={item.id} />
-                </div>
-              </div>
-            ))}
+          {
+  exchanges.filter(
+    (item) =>
+      item.firstCurrencyId === userSettings.defaultCurrencyId &&
+      item.secondCurrencyId === currency.currency.id
+  ).length === 0 ? (
+    <p className="text-foreground text-center bg-red-600 rounded-lg mb-2">Варіанти обміну не знайдено</p>
+  ) : (
+    exchanges
+      .filter(
+        (item) =>
+          item.firstCurrencyId === userSettings.defaultCurrencyId &&
+          item.secondCurrencyId === currency.currency.id
+      )
+      .map((item) => (
+        <div key={item.id} className="my-2 flex justify-between">
+          <p className="bg-foreground text-background flex items-center rounded-2xl px-2">
+            1 {item.currency2.code} = {formatDigits(item.rate)} {item.currency1.code}{" "}
+          </p>
+          <p className="text-foreground">{format(item.date, "PP", { locale: uk })}</p>
+          <div className="flex items-center gap-2">
+            <UserExchangeForm
+              title={<Pencil />}
+              firstCurrency={userSettings?.defaultCurrency}
+              secondCurrency={currency.currency}
+              edit={true}
+              data={item}
+              id={item.id}
+            />
+            <Confirm
+              title={<Trash2 />}
+              actionButtonTitle="Видалити"
+              fn={deleteExchange}
+              id={item.id}
+            />
+          </div>
+        </div>
+      ))
+  )
+}
+
 
           <Separator />
         </div>

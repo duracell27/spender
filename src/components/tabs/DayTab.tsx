@@ -1,5 +1,5 @@
 import React from "react";
-import { PanelRightClose, Pencil, Trash2 } from "lucide-react";
+import { PanelRightClose, Pencil, ShieldAlert, Trash2 } from "lucide-react";
 import Confirm from "@/components/Confirm";
 import { deleteTransaction, getTransactionsByPeriod } from "@/actions/transactions";
 import { calculateBalanceAndSums, formatDigits } from "@/lib/utils";
@@ -22,6 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { auth } from "../../../auth";
 import UserTransactionForm from "../forms/UserTransactionForm";
@@ -32,7 +33,7 @@ const DayTab = async ({
   wallets,
   categories,
   userSettings,
-  exchangeRates
+  exchangeRates,
 }: {
   wallets: Wallet[];
   categories: Category[];
@@ -43,27 +44,32 @@ const DayTab = async ({
   if (!session?.user.id) return;
 
   const { transactions, startDate } = await getTransactionsByPeriod("day", userSettings.activeWalletId);
-  const { balance, creditSum, debitSum } = calculateBalanceAndSums(wallets, userSettings.activeWalletId, exchangeRates);
+  const { balance, creditSum, debitSum, error } = calculateBalanceAndSums(
+    wallets,
+    userSettings.activeWalletId,
+    userSettings.defaultCurrencyId,
+    exchangeRates
+  );
 
   let currency;
 
-if (userSettings.activeWalletId === "all") {
-  currency = await prisma.currency.findFirst({
-    where: {
-      id: userSettings.defaultCurrencyId,
-    },
-  });
-} else {
-  currency = await prisma.currency.findFirst({
-    where: {
-      wallets: {
-        some: {
-          id: userSettings.activeWalletId,
+  if (userSettings.activeWalletId === "all") {
+    currency = await prisma.currency.findFirst({
+      where: {
+        id: userSettings.defaultCurrencyId,
+      },
+    });
+  } else {
+    currency = await prisma.currency.findFirst({
+      where: {
+        wallets: {
+          some: {
+            id: userSettings.activeWalletId,
+          },
         },
       },
-    },
-  });
-}
+    });
+  }
 
   if (!currency) return null;
 
@@ -89,7 +95,22 @@ if (userSettings.activeWalletId === "all") {
       </div>
       <div className="flex justify-evenly text-xs sm:text-sm">
         <div className="text-green-500 p-3 px-3 sm:px-5 bg-green-200 rounded-full">
-          Прибуток {formatDigits(debitSum)} {currency?.symbol}
+          <p className="flex items-center">
+            {" "}
+            Прибуток {formatDigits(debitSum)} {currency?.symbol}{" "}
+            {error && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <ShieldAlert className="size-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Не задано курс валюти для деяких рахунків, вкажіть всі курси у вкладці Валюти</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </p>
           {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
             <p>Курс не задано</p>
           ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
@@ -108,7 +129,22 @@ if (userSettings.activeWalletId === "all") {
               : "text-red-500 p-3 px-3 sm:px-5 bg-red-200 rounded-full"
           }
         >
-          Баланс {formatDigits(balance)} {currency?.symbol}
+          <p className="flex items-center">
+            {" "}
+            Баланс {formatDigits(balance)} {currency?.symbol}
+            {error && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <ShieldAlert className="size-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Не задано курс валюти для деяких рахунків, вкажіть всі курси у вкладці Валюти</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </p>
           {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
             <p>Курс не задано</p>
           ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
@@ -121,7 +157,22 @@ if (userSettings.activeWalletId === "all") {
           )}
         </div>
         <div className="text-red-500 p-3 px-3 sm:px-5 bg-red-200 rounded-full">
-          Витрати {formatDigits(creditSum)} {currency?.symbol}
+          <p className="flex items-center">
+            {" "}
+            Витрати {formatDigits(creditSum)} {currency?.symbol}{" "}
+            {error && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <ShieldAlert className="size-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Не задано курс валюти для деяких рахунків, вкажіть всі курси у вкладці Валюти</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </p>
           {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
             <p>Курс не задано</p>
           ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
