@@ -6,7 +6,7 @@ import MonthTab from "./MonthTab";
 import YearTab from "./YearTab";
 import { Category, Currency, ExchangeRate, UserSettings, Wallet } from "@prisma/client";
 
-const DashboardTabs = ({wallets, categories, userSettings, exchangeRates}: {wallets: Wallet[], categories: Category[], userSettings: UserSettings & {defaultCurrency: Currency}, exchangeRates: ExchangeRate[]}) => {
+const DashboardTabs = ({wallets, categories, userSettings, exchangeRates, pageNumber}: {wallets: Wallet[], categories: Category[], userSettings: UserSettings & {defaultCurrency: Currency}, exchangeRates: ExchangeRate[], pageNumber?:number}) => {
   
   return (
     <div className="flex justify-center ">
@@ -30,7 +30,7 @@ const DashboardTabs = ({wallets, categories, userSettings, exchangeRates}: {wall
           <MonthTab wallets={wallets} categories={categories} userSettings={userSettings} exchangeRates={exchangeRates}/>
         </TabsContent>
         <TabsContent value="YEAR">
-          <YearTab wallets={wallets} categories={categories} userSettings={userSettings} exchangeRates={exchangeRates}/>
+          <YearTab wallets={wallets} categories={categories} userSettings={userSettings} exchangeRates={exchangeRates} pageNumber={pageNumber}/>
         </TabsContent>
       </Tabs>
     </div>

@@ -221,13 +221,62 @@ export const deleteTransaction = async (id: string) => {
 
 
 // дістаємо транзакції по користувачу за вказаний період, та за активним рахунком
+// export async function getTransactionsByPeriod(
+//   period: "day" | "week" | "month" | "year",
+//   activeWalletId: string = "all"
+// ) {
+//   const session = await auth();
+//   if (!session?.user.id)
+//     return { transactions: [], startDate: new Date(), endDate: new Date() };
+
+//   let startDate: Date;
+//   let endDate: Date;
+
+//   if (period === "day") {
+//     startDate = startOfDay(new Date());
+//     endDate = endOfDay(new Date());
+//   } else if (period === "week") {
+//     startDate = startOfWeek(new Date(), { weekStartsOn: 1 });
+//     endDate = endOfWeek(new Date(), { weekStartsOn: 1 });
+//   } else if (period === "month") {
+//     startDate = startOfMonth(new Date());
+//     endDate = endOfMonth(new Date());
+//   } else if (period === "year") {
+//     startDate = startOfYear(new Date());
+//     endDate = endOfYear(new Date());
+//   } else {
+//     throw new Error("Invalid period");
+//   }
+
+//   const transactions = await prisma.transaction.findMany({
+//     where: {
+//       date: {
+//         gte: startDate,
+//         lte: endDate,
+//       },
+//       userId: session.user.id,
+//       ...(activeWalletId !== "all" && { walletId: activeWalletId }),
+//     },
+//     include: {
+//       category: true,
+//       wallet: true, // Пов’язана категорія, якщо потрібно
+//     },
+//     orderBy: {
+//       date: "desc", // Використовуємо поле date і сортуємо за спаданням (desc) або зростанням (asc)
+//     },
+//   });
+
+//   return { transactions, startDate, endDate };
+// }
 export async function getTransactionsByPeriod(
   period: "day" | "week" | "month" | "year",
-  activeWalletId: string = "all"
+  activeWalletId: string = "all",
+  page: number = 1, // Номер сторінки
+  limit: number = 10 // Кількість записів на сторінку
 ) {
   const session = await auth();
   if (!session?.user.id)
-    return { transactions: [], startDate: new Date(), endDate: new Date() };
+    return { transactions: [], startDate: new Date(), endDate: new Date(), total: 0 };
 
   let startDate: Date;
   let endDate: Date;
@@ -248,6 +297,22 @@ export async function getTransactionsByPeriod(
     throw new Error("Invalid period");
   }
 
+  // Вираховуємо, скільки записів пропустити
+  const skip = (page - 1) * limit;
+
+  // Отримуємо загальну кількість записів для пагінації
+  const total = await prisma.transaction.count({
+    where: {
+      date: {
+        gte: startDate,
+        lte: endDate,
+      },
+      userId: session.user.id,
+      ...(activeWalletId !== "all" && { walletId: activeWalletId }),
+    },
+  });
+
+  // Отримуємо записи з урахуванням пагінації
   const transactions = await prisma.transaction.findMany({
     where: {
       date: {
@@ -264,9 +329,11 @@ export async function getTransactionsByPeriod(
     orderBy: {
       date: "desc", // Використовуємо поле date і сортуємо за спаданням (desc) або зростанням (asc)
     },
+    skip, // Пропускаємо записи для пагінації
+    take: limit, // Обмежуємо кількість записів
   });
 
-  return { transactions, startDate, endDate };
+  return { transactions, startDate, endDate, total, page, limit };
 }
 
 

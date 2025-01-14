@@ -1,7 +1,10 @@
 import React from "react";
 import { PanelRightClose, Pencil, ShieldAlert, Trash2 } from "lucide-react";
 import Confirm from "@/components/Confirm";
-import { deleteTransaction, getTransactionsByPeriod } from "@/actions/transactions";
+import {
+  deleteTransaction,
+  getTransactionsByPeriod,
+} from "@/actions/transactions";
 import { calculateBalanceAndSums, formatDigits } from "@/lib/utils";
 import { format } from "date-fns";
 import { uk } from "date-fns/locale";
@@ -22,31 +25,61 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { auth } from "../../../auth";
 import UserTransactionForm from "../forms/UserTransactionForm";
-import { Category, Currency, ExchangeRate, UserSettings, Wallet } from "@prisma/client";
+import {
+  Category,
+  Currency,
+  ExchangeRate,
+  UserSettings,
+  Wallet,
+} from "@prisma/client";
 import { prisma } from "../../../prisma/prisma";
 
 const DayTab = async ({
   wallets,
   categories,
   userSettings,
-  exchangeRates
+  exchangeRates,
+  pageNumber
 }: {
   wallets: Wallet[];
   categories: Category[];
   userSettings: UserSettings & { defaultCurrency: Currency };
   exchangeRates: ExchangeRate[];
+  pageNumber?: number;
 }) => {
   const session = await auth();
   if (!session?.user.id) return;
-  const { transactions, startDate } = await getTransactionsByPeriod("year", userSettings.activeWalletId);
+  const { transactions, startDate, page } = await getTransactionsByPeriod(
+    "year",
+    userSettings.activeWalletId,
+    pageNumber,
+   10
+  );
 
-  const { balance, creditSum, debitSum, error } = calculateBalanceAndSums(wallets,
+  const { balance, creditSum, debitSum, error } = calculateBalanceAndSums(
+    wallets,
     userSettings.activeWalletId,
     userSettings.defaultCurrencyId,
-    exchangeRates);
+    exchangeRates
+  );
 
   let currency;
 
@@ -86,9 +119,11 @@ const DayTab = async ({
 
   return (
     <div>
-      <div className="font-bold text-center my-4 text-2xl">{format(startDate, "yyyy", { locale: uk })}</div>
+      <div className="font-bold text-center my-4 text-2xl">
+        {format(startDate, "yyyy", { locale: uk })}
+      </div>
       <div className="flex justify-evenly text-xs sm:text-sm">
-      <div className="text-green-500 p-3 px-3 sm:px-5 bg-green-200 rounded-full">
+        <div className="text-green-500 p-3 px-3 sm:px-5 bg-green-200 rounded-full">
           <p className="flex items-center">
             {" "}
             Прибуток {formatDigits(debitSum)} {currency?.symbol}{" "}
@@ -99,13 +134,17 @@ const DayTab = async ({
                     <ShieldAlert className="size-4" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Не задано курс валюти для деяких рахунків, вкажіть всі курси у вкладці Валюти</p>
+                    <p>
+                      Не задано курс валюти для деяких рахунків, вкажіть всі
+                      курси у вкладці Валюти
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             )}
           </p>
-          {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
+          {currency.id !== userSettings.defaultCurrencyId &&
+          exchanges === null ? (
             <p>Курс не задано</p>
           ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
             <p className="text-center text-xs">
@@ -133,13 +172,17 @@ const DayTab = async ({
                     <ShieldAlert className="size-4" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Не задано курс валюти для деяких рахунків, вкажіть всі курси у вкладці Валюти</p>
+                    <p>
+                      Не задано курс валюти для деяких рахунків, вкажіть всі
+                      курси у вкладці Валюти
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             )}
           </p>
-          {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
+          {currency.id !== userSettings.defaultCurrencyId &&
+          exchanges === null ? (
             <p>Курс не задано</p>
           ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
             <p className="text-center text-xs">
@@ -161,13 +204,17 @@ const DayTab = async ({
                     <ShieldAlert className="size-4" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Не задано курс валюти для деяких рахунків, вкажіть всі курси у вкладці Валюти</p>
+                    <p>
+                      Не задано курс валюти для деяких рахунків, вкажіть всі
+                      курси у вкладці Валюти
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             )}
           </p>
-          {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
+          {currency.id !== userSettings.defaultCurrencyId &&
+          exchanges === null ? (
             <p>Курс не задано</p>
           ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
             <p className="text-center text-xs">
@@ -199,7 +246,9 @@ const DayTab = async ({
 
       <div className="">
         <Table className="text-[8px] sm:text-sm">
-          <TableCaption className="caption-top font-bold">Лист транзакцій</TableCaption>
+          <TableCaption className="caption-top font-bold">
+            Лист транзакцій
+          </TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="">Дата</TableHead>
@@ -220,13 +269,19 @@ const DayTab = async ({
                 }
                 key={transaction.id}
               >
-                <TableCell>{format(transaction.date, "dd.MM", { locale: uk })}</TableCell>
+                <TableCell>
+                  {format(transaction.date, "dd.MM", { locale: uk })}
+                </TableCell>
                 <TableCell>{transaction.title}</TableCell>
                 <TableCell>
                   {formatDigits(transaction.amount)} {currency?.symbol}
                 </TableCell>
-                <TableCell className="font-medium">{transaction.category.name}</TableCell>
-                <TableCell className="font-medium">{transaction.wallet.name}</TableCell>
+                <TableCell className="font-medium">
+                  {transaction.category.name}
+                </TableCell>
+                <TableCell className="font-medium">
+                  {transaction.wallet.name}
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="hidden sm:block">
                     <div className="flex justify-end gap-2">
@@ -285,6 +340,19 @@ const DayTab = async ({
             ))}
           </TableBody>
         </Table>
+        <Pagination>
+          <PaginationContent className="mt-2">
+            <PaginationItem className="border">
+              <PaginationPrevious href={`/dashboard/transactions/${pageNumber-1}`} />
+            </PaginationItem>
+            <PaginationItem className="border">
+              <PaginationLink href={`/dashboard/transactions/${pageNumber}`}>{pageNumber}</PaginationLink>
+            </PaginationItem>
+            <PaginationItem className="border">
+              <PaginationNext href={`/dashboard/transactions/${pageNumber+1}`} />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );
