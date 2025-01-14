@@ -22,6 +22,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { auth } from "../../../auth";
@@ -34,16 +43,25 @@ const DayTab = async ({
   categories,
   userSettings,
   exchangeRates,
+  pageNumber,
+  currentTab,
 }: {
   wallets: Wallet[];
   categories: Category[];
   userSettings: UserSettings & { defaultCurrency: Currency };
   exchangeRates: ExchangeRate[];
+  pageNumber: number;
+  currentTab?: string;
 }) => {
   const session = await auth();
   if (!session?.user.id) return;
 
-  const { transactions, startDate } = await getTransactionsByPeriod("day", userSettings.activeWalletId);
+  const { transactions, startDate } = await getTransactionsByPeriod(
+    "day",
+    userSettings.activeWalletId,
+    pageNumber,
+    10
+  );
   const { balance, creditSum, debitSum, error } = calculateBalanceAndSums(
     wallets,
     userSettings.activeWalletId,
@@ -221,8 +239,8 @@ const DayTab = async ({
               <TableRow
                 className={
                   transaction.transactionType === "DEBIT"
-                    ? "bg-green-400 text-background"
-                    : "bg-red-400 text-background"
+                    ? "bg-green-400 text-background hover:bg-green-600"
+                    : "bg-red-400 text-background hover:bg-red-600"
                 }
                 key={transaction.id}
               >
@@ -291,6 +309,21 @@ const DayTab = async ({
             ))}
           </TableBody>
         </Table>
+        <Pagination>
+          <PaginationContent className="mt-2">
+            <PaginationItem className="border">
+              <PaginationPrevious href={`/dashboard/transactions/${pageNumber - 1}?tab=${currentTab}`} />
+            </PaginationItem>
+            <PaginationItem className="border">
+              <PaginationLink href={`/dashboard/transactions/${pageNumber}?tab=${currentTab}`}>
+                {pageNumber}
+              </PaginationLink>
+            </PaginationItem>
+            <PaginationItem className="border">
+              <PaginationNext href={`/dashboard/transactions/${pageNumber + 1}?tab=${currentTab}`} />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );

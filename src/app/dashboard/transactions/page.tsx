@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 // import { Currency, UserSettings } from "@prisma/client";
 // import DashboardWrapper from "@/components/DashboardWrapper";
 
-const TransactionPage = async () => {
+const TransactionPage = async ({ searchParams }: { searchParams: { tab?: string } }) => {
+  const searchParam = searchParams.tab;
   const session = await auth();
   if (!session?.user.id) return;
   const wallets = await prisma.wallet.findMany({
@@ -63,7 +64,7 @@ const TransactionPage = async () => {
     <div className="p-4">
       {userSettings?.id && (<ActiveWalletSelect wallets={wallets} userSettings={userSettings}/>)}
       
-      <DashboardTabs wallets={wallets} categories={categories} userSettings={userSettings} exchangeRates={exchangeRates} pageNumber={1}/>
+      <DashboardTabs wallets={wallets} categories={categories} userSettings={userSettings} exchangeRates={exchangeRates} pageNumber={1} searchParam={searchParam}/>
     </div>
   );
 };

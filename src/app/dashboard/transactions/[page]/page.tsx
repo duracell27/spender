@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/button";
 // import { Currency, UserSettings } from "@prisma/client";
 // import DashboardWrapper from "@/components/DashboardWrapper";
 
-const TransactionPage = async ({ params }: { params: { page: string } }) => {
+const TransactionPage = async ({ params, searchParams }: { params: { page: string }, searchParams: { tab?: string } }) => {
   const { page } = await params;
-  const pageNumber = parseInt(page, 10);
+  const pageNumber = parseInt(page, 10) || 1 // якщо не було передано номер сторінки пагінації то ставив першу
+  
+  const searchParam = searchParams.tab;
   const session = await auth();
   if (!session?.user.id) return;
   const wallets = await prisma.wallet.findMany({
@@ -75,6 +77,7 @@ const TransactionPage = async ({ params }: { params: { page: string } }) => {
         userSettings={userSettings}
         exchangeRates={exchangeRates}
         pageNumber={pageNumber}
+        searchParam={searchParam}
       />
     </div>
   );

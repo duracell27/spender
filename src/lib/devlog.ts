@@ -1,5 +1,9 @@
 export const devlog = [
   {
+    version: "0.14",
+    description: "Додана пагінація у вкладках",
+  },
+  {
     version: "0.135",
     description: "Відредаговано барчарт, показ топ 7 витрат по категорях",
   },

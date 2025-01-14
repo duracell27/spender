@@ -16,7 +16,7 @@ export default async function Home() {
 
       <Dialog>
         <DialogTrigger asChild>
-          <Button>v 0.135</Button>
+          <Button>v 0.14</Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>

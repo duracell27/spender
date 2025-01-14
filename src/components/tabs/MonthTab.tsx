@@ -22,6 +22,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { auth } from "../../../auth";
 import UserTransactionForm from "../forms/UserTransactionForm";
@@ -32,22 +40,33 @@ const DayTab = async ({
   wallets,
   categories,
   userSettings,
-  exchangeRates
+  exchangeRates,
+  pageNumber,
+  currentTab,
 }: {
   wallets: Wallet[];
   categories: Category[];
   userSettings: UserSettings & { defaultCurrency: Currency };
   exchangeRates: ExchangeRate[];
+  pageNumber: number;
+  currentTab?: string;
 }) => {
   const session = await auth();
   if (!session?.user.id) return;
 
-  const { transactions, startDate } = await getTransactionsByPeriod("month", userSettings.activeWalletId);
+  const { transactions, startDate } = await getTransactionsByPeriod(
+    "month",
+    userSettings.activeWalletId,
+    pageNumber,
+    10
+  );
 
-  const { balance, creditSum, debitSum, error } = calculateBalanceAndSums(wallets,
+  const { balance, creditSum, debitSum, error } = calculateBalanceAndSums(
+    wallets,
     userSettings.activeWalletId,
     userSettings.defaultCurrencyId,
-    exchangeRates);
+    exchangeRates
+  );
 
   let currency;
 
@@ -92,7 +111,7 @@ const DayTab = async ({
         {format(startDate, "LLLL", { locale: uk })}
       </div>
       <div className="flex justify-evenly text-xs sm:text-sm">
-      <div className="text-green-500 p-3 px-3 sm:px-5 bg-green-200 rounded-full">
+        <div className="text-green-500 p-3 px-3 sm:px-5 bg-green-200 rounded-full">
           <p className="flex items-center">
             {" "}
             Прибуток {formatDigits(debitSum)} {currency?.symbol}{" "}
@@ -219,8 +238,8 @@ const DayTab = async ({
               <TableRow
                 className={
                   transaction.transactionType === "DEBIT"
-                    ? "bg-green-400 text-background"
-                    : "bg-red-400 text-background"
+                    ? "bg-green-400 text-background hover:bg-green-600"
+                    : "bg-red-400 text-background hover:bg-red-600"
                 }
                 key={transaction.id}
               >
@@ -289,6 +308,21 @@ const DayTab = async ({
             ))}
           </TableBody>
         </Table>
+        <Pagination>
+          <PaginationContent className="mt-2">
+            <PaginationItem className="border">
+              <PaginationPrevious href={`/dashboard/transactions/${pageNumber - 1}?tab=${currentTab}`} />
+            </PaginationItem>
+            <PaginationItem className="border">
+              <PaginationLink href={`/dashboard/transactions/${pageNumber}?tab=${currentTab}`}>
+                {pageNumber}
+              </PaginationLink>
+            </PaginationItem>
+            <PaginationItem className="border">
+              <PaginationNext href={`/dashboard/transactions/${pageNumber + 1}?tab=${currentTab}`} />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );
