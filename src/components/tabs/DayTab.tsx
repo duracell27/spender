@@ -56,12 +56,13 @@ const DayTab = async ({
   const session = await auth();
   if (!session?.user.id) return;
 
-  const { transactions, startDate } = await getTransactionsByPeriod(
+  const { transactions, startDate, total } = await getTransactionsByPeriod(
     "day",
     userSettings.activeWalletId,
     pageNumber,
     10
   );
+
   const { balance, creditSum, debitSum, error } = calculateBalanceAndSums(
     wallets,
     userSettings.activeWalletId,
@@ -309,21 +310,34 @@ const DayTab = async ({
             ))}
           </TableBody>
         </Table>
-        <Pagination>
-          <PaginationContent className="mt-2">
-            <PaginationItem className="border">
-              <PaginationPrevious href={`/dashboard/transactions/${pageNumber - 1}?tab=${currentTab}`} />
-            </PaginationItem>
-            <PaginationItem className="border">
-              <PaginationLink href={`/dashboard/transactions/${pageNumber}?tab=${currentTab}`}>
-                {pageNumber}
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem className="border">
-              <PaginationNext href={`/dashboard/transactions/${pageNumber + 1}?tab=${currentTab}`} />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        {total > 10 ? (
+          <Pagination>
+            <PaginationContent className="mt-2">
+              {pageNumber > 1 ? (
+                <PaginationItem className="border">
+                  <PaginationPrevious href={`/dashboard/transactions/${pageNumber - 1}?tab=${currentTab}`} />
+                </PaginationItem>
+              ) : (
+                ""
+              )}
+
+              <PaginationItem className="border">
+                <PaginationLink href={`/dashboard/transactions/${pageNumber}?tab=${currentTab}`}>
+                  {pageNumber}
+                </PaginationLink>
+              </PaginationItem>
+              {total > pageNumber * 10 ? (
+                <PaginationItem className="border">
+                  <PaginationNext href={`/dashboard/transactions/${pageNumber + 1}?tab=${currentTab}`} />
+                </PaginationItem>
+              ) : (
+                ""
+              )}
+            </PaginationContent>
+          </Pagination>
+        ) : (
+          ""
+        )}
       </div>
     </div>
   );

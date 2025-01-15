@@ -1,27 +1,25 @@
 import React from "react";
 import { auth } from "../../../../../auth";
 import { prisma } from "../../../../../prisma/prisma";
-
 import DashboardTabs from "@/components/tabs/DashboardTabs";
-// import WalletSelect from "@/components/WalletSelect";
 import { ActiveWalletSelect } from "@/components/forms/UserDashboardWaletSelect";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-// import { Currency, UserSettings } from "@prisma/client";
-// import DashboardWrapper from "@/components/DashboardWrapper";
 
 const TransactionPage = async ({ params, searchParams }: { params: { page: string }, searchParams: { tab?: string } }) => {
-  const { page } = await params;
+  const { page } = params; // отримуємо номер сторінки для пагінації
   const pageNumber = parseInt(page, 10) || 1 // якщо не було передано номер сторінки пагінації то ставив першу
-  
-  const searchParam = searchParams.tab;
+  const searchParam = searchParams.tab; // отримуємо параметр з строки щоб визначити яку вкладку потрібно відобразити
+
   const session = await auth();
   if (!session?.user.id) return;
+  // отримаємо всі рахунки користувача
   const wallets = await prisma.wallet.findMany({
     where: {
       userId: session.user.id,
     },
   });
+  // отримаємо всі категорії користувача
   const categories = await prisma.category.findMany({
     where: {
       userId: session.user.id,
@@ -30,17 +28,13 @@ const TransactionPage = async ({ params, searchParams }: { params: { page: strin
       name: "asc",
     },
   });
-
+  // отримаємо всі курси валют користувача
   const exchangeRates = await prisma.exchangeRate.findMany({
     where: {
       userId: session.user.id,
     },
-    // include: {
-    //   currency1: true,
-    //   currency2: true,
-    // },
   });
-
+  // отримаємо налаштування користувача
   const userSettings = await prisma.userSettings.findUnique({
     where: {
       userId: session.user.id,
@@ -50,8 +44,8 @@ const TransactionPage = async ({ params, searchParams }: { params: { page: strin
     },
   });
 
-  if (!userSettings?.id) return null;
-
+  if (!userSettings?.id) return null; // якщо не знайдено налаштувань користувача то повертаємо null
+  // якщо немає рахунків то пропонуємо додати рахунок
   if (wallets.length === 0)
     return (
       <div className="flex h-screen justify-center items-center">
