@@ -12,6 +12,7 @@ export const addExchange = async (data: ExchangeFormValues) => {
   const session = await auth();
     if (!session?.user.id) return;
   try {
+    // створюмо ексчендж на базі даних з форми
      await prisma.exchangeRate.create({
         data: {
           rate: data.rate,
@@ -21,6 +22,17 @@ export const addExchange = async (data: ExchangeFormValues) => {
           secondCurrencyId: data.secondCurrencyId
         }
       });
+      // створюмо зворотній ексчендж на базі даних з форми, зеркальний курс
+      await prisma.exchangeRate.create({
+        data: {
+          rate: 1 / data.rate,
+          date: data.date,
+          userId: session.user.id,
+          firstCurrencyId: data.secondCurrencyId,
+          secondCurrencyId: data.firstCurrencyId,
+        }
+      });
+
   } catch (error) {
     console.error(error);
   }

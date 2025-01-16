@@ -361,11 +361,13 @@ export async function getMonthlyExpenses(
     select: {
       amount: true,
       date: true,
+      
     },
   });
 
   // Ініціалізувати масив з днями місяця
   const daysInMonth = new Date(year, month, 0).getDate();
+
   const data: ChartData[] = Array.from({ length: daysInMonth }, (_, i) => ({
     day: (i + 1).toString().padStart(2, "0"), // Дні у форматі "01", "02", ...
     value: 0,
@@ -373,12 +375,15 @@ export async function getMonthlyExpenses(
 
   // Сумувати витрати за кожен день
   for (const transaction of transactions) {
+    console.log('тразакція', transaction)
     const day = new Date(transaction.date).getDate(); // Отримати номер дня
     data[day - 1].value += transaction.amount; // Додати до відповідного дня
   }
 
   return data;
 }
+
+
 
 //дістаємо дані для графіка сума по категорії
 export async function getMonthlyExpensesByCategory(userId: string, month: number, year: number) {

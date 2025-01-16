@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 // import DashboardWrapper from "@/components/DashboardWrapper";
 
 const TransactionPage = async ({ searchParams }: { searchParams: { tab?: string } }) => {
-  const searchParam = searchParams.tab;
+  
   const session = await auth();
   if (!session?.user.id) return;
   const wallets = await prisma.wallet.findMany({
@@ -28,25 +28,26 @@ const TransactionPage = async ({ searchParams }: { searchParams: { tab?: string 
       name: 'asc'
     }
   });
-
+  
   const exchangeRates = await prisma.exchangeRate.findMany({
     where: {
       userId: session.user.id,
     },
     // include: {
-    //   currency1: true,
-    //   currency2: true,
-    // },
-  })
-
-  const userSettings = await prisma.userSettings.findUnique({
-    where: {
-      userId: session.user.id,
-    },
-    include: {
-      defaultCurrency: true,
-    },
-  }) 
+      //   currency1: true,
+      //   currency2: true,
+      // },
+    })
+    
+    const userSettings = await prisma.userSettings.findUnique({
+      where: {
+        userId: session.user.id,
+      },
+      include: {
+        defaultCurrency: true,
+      },
+    }) 
+  const {tab} = await searchParams || userSettings?.defaultPeriod
 
   if (!userSettings?.id) return null
 
@@ -64,7 +65,7 @@ const TransactionPage = async ({ searchParams }: { searchParams: { tab?: string 
     <div className="p-4">
       {userSettings?.id && (<ActiveWalletSelect wallets={wallets} userSettings={userSettings}/>)}
       
-      <DashboardTabs wallets={wallets} categories={categories} userSettings={userSettings} exchangeRates={exchangeRates} pageNumber={1} searchParam={searchParam}/>
+      <DashboardTabs wallets={wallets} categories={categories} userSettings={userSettings} exchangeRates={exchangeRates} pageNumber={1} searchParam={tab}/>
     </div>
   );
 };
