@@ -346,7 +346,8 @@ interface ChartData {
 export async function getMonthlyExpenses(
   userId: string,
   month: number,
-  year: number
+  year: number,
+  defaultCurrencyId: string
 ): Promise<ChartData[]> {
   // Отримати всі транзакції за вказаний місяць і рік з типом `credit`
   const transactions = await prisma.transaction.findMany({
@@ -358,12 +359,16 @@ export async function getMonthlyExpenses(
         lt: new Date(year, month, 1), // Початок наступного місяця
       },
     },
-    select: {
-      amount: true,
-      date: true,
-      
+    include:{
+      wallet: true
     },
   });
+
+  const exchangeRates = await prisma.exchangeRate.findMany({
+    where:{
+      userId
+    }
+  })
 
   // Ініціалізувати масив з днями місяця
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -375,18 +380,36 @@ export async function getMonthlyExpenses(
 
   // Сумувати витрати за кожен день
   for (const transaction of transactions) {
-    console.log('тразакція', transaction)
+    // console.log('стандартна валюта', defaultCurrencyId)
+    // console.log('тразакція', transaction.wallet.currencyId)
+    // console.log('сума', transaction.amount)
+    // console.log('ексченджі', exchangeRates)
     const day = new Date(transaction.date).getDate(); // Отримати номер дня
-    data[day - 1].value += transaction.amount; // Додати до відповідного дня
-  }
+    if(transaction.wallet.currencyId !== defaultCurrencyId){
+      const exchangeRate = exchangeRates.find(rate => rate.firstCurrencyId === defaultCurrencyId  && rate.secondCurrencyId === transaction.wallet.currencyId)
+      // console.log('знайдений',exchangeRate)
+      // console.log('сума транз', transaction.amount)
+      // console.log('обмін', exchangeRate?.rate)
+      if(exchangeRate){
+         
+        data[day - 1].value += transaction.amount * exchangeRate.rate; // Додати до відповідного дня
+      }else{
+        data[day - 1].value += 0;
+      }
 
+    }else{
+      data[day - 1].value += transaction.amount;
+    }
+    // console.log('debag', data)
+  }
+  // console.log('data',data)
   return data;
 }
 
 
 
 //дістаємо дані для графіка сума по категорії
-export async function getMonthlyExpensesByCategory(userId: string, month: number, year: number) {
+export async function getMonthlyExpensesByCategory(userId: string, month: number, year: number, defaultCurrencyId:string) {
   const startDate = new Date(year, month - 1, 1); // Початок місяця
   const endDate = new Date(year, month, 0, 23, 59, 59, 999); // Кінець місяця
 
@@ -405,6 +428,8 @@ export async function getMonthlyExpensesByCategory(userId: string, month: number
     },
   });
 
+  console.log('transactions', transactions)
+
   const categories = await prisma.category.findMany({
     where: {
       id: {
@@ -417,6 +442,14 @@ export async function getMonthlyExpensesByCategory(userId: string, month: number
     },
   });
 
+  console.log('categories', categories)
+
+  const exchangeRates = await prisma.exchangeRate.findMany({
+    where:{
+      userId
+    }
+  })
+
   const data = transactions.map((transaction) => {
     const category = categories.find((cat) => cat.id === transaction.categoryId);
     return {
@@ -426,9 +459,9 @@ export async function getMonthlyExpensesByCategory(userId: string, month: number
   });
 
   // Сортуємо дані за спаданням суми витрат
-  const top7 = data.sort((a, b) => b.sum - a.sum).slice(0, 7);
+  const top8 = data.sort((a, b) => b.sum - a.sum).slice(0, 8);
 
-  return top7;
+  return top8;
 }
 
 //дістаємо дані для графіка мак мін вистрати і середні

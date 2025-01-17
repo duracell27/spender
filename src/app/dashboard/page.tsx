@@ -30,8 +30,8 @@ const DashboardPage = async () => {
   });
   if (!userSettings?.id) return null;
 
-  const data = await getMonthlyExpenses(session.user.id, monthNumber, year);
-  const dataBars = await getMonthlyExpensesByCategory(session.user.id, monthNumber, year);
+  const data = await getMonthlyExpenses(session.user.id, monthNumber, year, userSettings.defaultCurrencyId);
+  const dataBars = await getMonthlyExpensesByCategory(session.user.id, monthNumber, year, userSettings.defaultCurrencyId);
   const dataInfo = await getMonthlyInfoData(session.user.id, monthNumber, year);
 
   return (

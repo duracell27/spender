@@ -1,4 +1,5 @@
 "use client";
+import { formatDigits } from "@/lib/utils";
 import { Currency, UserSettings } from "@prisma/client";
 import React from "react";
 import {
@@ -28,12 +29,15 @@ interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, cyrSymbol }) => {
   if (active && payload && payload.length) {
-    return (
-      <div className="border-foreground border shadow-md p-2 rounded bg-background text-foreground">
+    if(payload[0].value !== undefined){
+
+      return (
+        <div className="border-foreground border shadow-md p-2 rounded bg-background text-foreground">
         <p className="text-sm font-bold">{`День: ${label}`}</p>
-        <p className="text-sm">{`Сума: ${payload[0].value} ${cyrSymbol}`}</p>
+        <p className="text-sm">{`Сума: ${formatDigits(payload[0].value)} ${cyrSymbol}`}</p>
       </div>
     );
+  }
   }
 
   return null;

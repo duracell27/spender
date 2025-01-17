@@ -98,10 +98,23 @@ export function calculateBalanceAndSums(
   }
 }
 
-export function formatDigits(amount: number) {
+export function formatDigits(amount: number | string): string {
+  // Перетворюємо вхідне значення на число
+  const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount;
+
+  // Перевіряємо, чи це валідне число
+  if (isNaN(numericAmount)) {
+    throw new Error("Invalid input: amount must be a number or a numeric string");
+  }
+
+  // Обрізаємо зайві десяткові знаки до двох без округлення
+  const truncatedAmount = Math.floor(numericAmount * 100) / 100;
+
+  // Форматуємо число з розділенням тисяч
   const formatter = new Intl.NumberFormat("uk-UA", {
-    minimumFractionDigits: 0, // Мінімум десяткових знаків
-    maximumFractionDigits: 2, // Максимум два десяткових знаки
+    minimumFractionDigits: 0, // Завжди два десяткові знаки
+    maximumFractionDigits: 2, // Максимум два десяткові знаки
   });
-  return formatter.format(amount);
+
+  return formatter.format(truncatedAmount);
 }
