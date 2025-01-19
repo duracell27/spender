@@ -46,12 +46,11 @@ export function calculateBalanceAndSums(
         let walletBalance = wallet.balance;
         let walletCredit = wallet.creditSum;
         let walletDebit = wallet.debitSum;
-        console.log("wallet назва", wallet.name);
+     
         // Якщо валюта гаманця відрізняється, виконуємо конвертацію
         let exchangeRate;
         if (wallet.currencyId !== defaultCurrencyId) {
-          console.log("відрізняється");
-          console.log("всі ексченджі", exchangeRates);
+          
           if (exchangeRates === undefined) {
             result.error = true;
           } else {
@@ -61,7 +60,6 @@ export function calculateBalanceAndSums(
                 (rate.secondCurrencyId === defaultCurrencyId && rate.firstCurrencyId === wallet.currencyId)
             );
           }
-          console.log("exchangeRate найдений", exchangeRate);
 
           if (!exchangeRate) {
             result.error = true;

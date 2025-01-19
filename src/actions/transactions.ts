@@ -380,16 +380,11 @@ export async function getMonthlyExpenses(
 
   // Сумувати витрати за кожен день
   for (const transaction of transactions) {
-    // console.log('стандартна валюта', defaultCurrencyId)
-    // console.log('тразакція', transaction.wallet.currencyId)
-    // console.log('сума', transaction.amount)
-    // console.log('ексченджі', exchangeRates)
+    
     const day = new Date(transaction.date).getDate(); // Отримати номер дня
     if(transaction.wallet.currencyId !== defaultCurrencyId){
       const exchangeRate = exchangeRates.find(rate => rate.firstCurrencyId === defaultCurrencyId  && rate.secondCurrencyId === transaction.wallet.currencyId)
-      // console.log('знайдений',exchangeRate)
-      // console.log('сума транз', transaction.amount)
-      // console.log('обмін', exchangeRate?.rate)
+    
       if(exchangeRate){
          
         data[day - 1].value += transaction.amount * exchangeRate.rate; // Додати до відповідного дня
@@ -400,21 +395,80 @@ export async function getMonthlyExpenses(
     }else{
       data[day - 1].value += transaction.amount;
     }
-    // console.log('debag', data)
+  
   }
-  // console.log('data',data)
+  
   return data;
 }
 
 
 
 //дістаємо дані для графіка сума по категорії
-export async function getMonthlyExpensesByCategory(userId: string, month: number, year: number, defaultCurrencyId:string) {
+// export async function getMonthlyExpensesByCategory(userId: string, month: number, year: number, defaultCurrencyId:string) {
+//   const startDate = new Date(year, month - 1, 1); // Початок місяця
+//   const endDate = new Date(year, month, 0, 23, 59, 59, 999); // Кінець місяця
+
+//   const transactions = await prisma.transaction.groupBy({
+//     by: ['categoryId'],
+//     where: {
+//       userId,
+//       transactionType: 'CREDIT',
+//       date: {
+//         gte: startDate,
+//         lte: endDate,
+//       },
+//     },
+//     _sum: {
+//       amount: true,
+//     },
+//   });
+
+
+//   const categories = await prisma.category.findMany({
+//     where: {
+//       id: {
+//         in: transactions.map((t) => t.categoryId),
+//       },
+//     },
+//     select: {
+//       id: true,
+//       name: true,
+//     },
+//   });
+
+
+//   const exchangeRates = await prisma.exchangeRate.findMany({
+//     where:{
+//       userId
+//     }
+//   })
+
+//   const data = transactions.map((transaction) => {
+//     const category = categories.find((cat) => cat.id === transaction.categoryId);
+//     return {
+//       catName: category?.name || 'Unknown',
+//       sum: transaction._sum.amount || 0,
+//     };
+//   });
+
+//   // Сортуємо дані за спаданням суми витрат
+//   const top8 = data.sort((a, b) => b.sum - a.sum).slice(0, 8);
+
+//   return top8;
+// }
+
+export async function getMonthlyExpensesByCategory(
+  userId: string,
+  month: number,
+  year: number,
+  defaultCurrencyId: string
+) {
   const startDate = new Date(year, month - 1, 1); // Початок місяця
   const endDate = new Date(year, month, 0, 23, 59, 59, 999); // Кінець місяця
 
+  // Отримуємо транзакції
   const transactions = await prisma.transaction.groupBy({
-    by: ['categoryId'],
+    by: ['categoryId', 'walletId'],
     where: {
       userId,
       transactionType: 'CREDIT',
@@ -428,8 +482,9 @@ export async function getMonthlyExpensesByCategory(userId: string, month: number
     },
   });
 
-  console.log('transactions', transactions)
+ 
 
+  // Отримуємо категорії
   const categories = await prisma.category.findMany({
     where: {
       id: {
@@ -442,19 +497,55 @@ export async function getMonthlyExpensesByCategory(userId: string, month: number
     },
   });
 
-  console.log('categories', categories)
 
+
+  // Отримуємо курси обміну
   const exchangeRates = await prisma.exchangeRate.findMany({
-    where:{
-      userId
-    }
-  })
+    where: {
+      userId,
+    },
+  });
 
+
+  // Отримуємо валюти гаманців транзакцій
+  const wallets = await prisma.wallet.findMany({
+    where: {
+      id: {
+        in: transactions.map((t) => t.walletId),
+      },
+    },
+    select: {
+      id: true,
+      currencyId: true,
+    },
+  });
+
+  // Обробляємо транзакції
   const data = transactions.map((transaction) => {
     const category = categories.find((cat) => cat.id === transaction.categoryId);
+    const wallet = wallets.find((w) => w.id === transaction.walletId);
+
+    let sum = transaction._sum.amount || 0;
+
+    if (wallet && wallet.currencyId !== defaultCurrencyId) {
+      // Знаходимо курс обміну
+      const exchangeRate = exchangeRates.find(
+        (rate) =>
+          rate.secondCurrencyId === wallet.currencyId &&
+          rate.firstCurrencyId === defaultCurrencyId
+      );
+
+      if (exchangeRate) {
+        // Конвертуємо суму
+        sum *= exchangeRate.rate;
+      } else {
+        console.warn(`No exchange rate found for ${wallet.currencyId} -> ${defaultCurrencyId}`);
+      }
+    }
+
     return {
       catName: category?.name || 'Unknown',
-      sum: transaction._sum.amount || 0,
+      sum,
     };
   });
 
@@ -464,6 +555,7 @@ export async function getMonthlyExpensesByCategory(userId: string, month: number
   return top8;
 }
 
+
 //дістаємо дані для графіка мак мін вистрати і середні
 export interface MonthlyInfoData {
   maxExpense: { title: string; amount: string } | null;
@@ -472,16 +564,75 @@ export interface MonthlyInfoData {
   averageDailyIncome: number;
 }
 
+// export const getMonthlyInfoData = async (
+//   userId: string,
+//   month: number,
+//   year: number,
+//   defaultCurrencyId: string
+// ): Promise<MonthlyInfoData> => {
+//   // Calculate the start and end dates for the given month
+//   const startDate = new Date(year, month - 1, 1);
+//   const endDate = new Date(year, month, 0); // Last day of the month
+
+//   // Get all transactions for the specified user and date range
+//   const transactions = await prisma.transaction.findMany({
+//     where: {
+//       userId,
+//       date: {
+//         gte: startDate,
+//         lte: endDate,
+//       },
+//     },
+//   });
+
+//   // Filter transactions into expenses and incomes
+//   const expenses = transactions.filter((t) => t.transactionType === 'CREDIT');
+//   const incomes = transactions.filter((t) => t.transactionType === 'DEBIT');
+
+//   // Calculate the maximum expense
+//   const maxExpense = expenses.length
+//     ? expenses.reduce((max, t) => (t.amount > max.amount ? t : max))
+//     : null;
+
+//   // Calculate the maximum income
+//   const maxIncome = incomes.length
+//     ? incomes.reduce((max, t) => (t.amount > max.amount ? t : max))
+//     : null;
+
+//   // Calculate the average daily expense (up to today's day)
+//   const today = new Date();
+//   const currentDay = today.getFullYear() === year && today.getMonth() === month - 1
+//     ? today.getDate()
+//     : endDate.getDate();
+//   const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
+//   const averageDailyExpense = expenses.length ? totalExpense / currentDay : 0;
+
+//   // Calculate the average daily income (for the whole month)
+//   const totalIncome = incomes.reduce((sum, t) => sum + t.amount, 0);
+//   const averageDailyIncome = incomes.length ? totalIncome / endDate.getDate() : 0;
+
+//   return {
+//     maxExpense: maxExpense
+//       ? { title: maxExpense.title, amount: formatDigits(maxExpense.amount) }
+//       : { title: '', amount: formatDigits(0) },
+//     maxIncome: maxIncome
+//       ? { title: maxIncome.title, amount: formatDigits(maxIncome.amount) }
+//       : { title: '', amount: formatDigits(0) },
+//     averageDailyExpense: +averageDailyExpense.toFixed(2),
+//     averageDailyIncome: +averageDailyIncome.toFixed(2),
+//   };
+// };
+
 export const getMonthlyInfoData = async (
   userId: string,
   month: number,
-  year: number
+  year: number,
+  defaultCurrencyId: string
 ): Promise<MonthlyInfoData> => {
-  // Calculate the start and end dates for the given month
   const startDate = new Date(year, month - 1, 1);
-  const endDate = new Date(year, month, 0); // Last day of the month
+  const endDate = new Date(year, month, 0);
 
-  // Get all transactions for the specified user and date range
+  // Отримуємо всі транзакції користувача
   const transactions = await prisma.transaction.findMany({
     where: {
       userId,
@@ -492,29 +643,80 @@ export const getMonthlyInfoData = async (
     },
   });
 
-  // Filter transactions into expenses and incomes
-  const expenses = transactions.filter((t) => t.transactionType === 'CREDIT');
-  const incomes = transactions.filter((t) => t.transactionType === 'DEBIT');
+  // Отримуємо курси обміну
+  const exchangeRates = await prisma.exchangeRate.findMany({
+    where: {
+      userId,
+    },
+  });
 
-  // Calculate the maximum expense
+  // Отримуємо валюти гаманців
+  const wallets = await prisma.wallet.findMany({
+    where: {
+      id: {
+        in: transactions.map((t) => t.walletId),
+      },
+    },
+    select: {
+      id: true,
+      currencyId: true,
+    },
+  });
+
+  // Функція для конвертації суми
+  const convertToDefaultCurrency = (amount: number, walletId: string): number => {
+    const wallet = wallets.find((w) => w.id === walletId);
+
+    if (wallet && wallet.currencyId !== defaultCurrencyId) {
+      const exchangeRate = exchangeRates.find(
+        (rate) =>
+          rate.secondCurrencyId === wallet.currencyId &&
+          rate.firstCurrencyId === defaultCurrencyId
+      );
+
+      if (exchangeRate) {
+        return amount * exchangeRate.rate;
+      } else {
+        console.warn(`No exchange rate found for ${wallet.currencyId} -> ${defaultCurrencyId}`);
+        return amount; // Якщо курс не знайдено, повертаємо початкову суму
+      }
+    }
+
+    return amount; // Якщо валюта співпадає, повертаємо початкову суму
+  };
+
+  // Конвертуємо всі транзакції до базової валюти
+  const convertedTransactions = transactions.map((t) => ({
+    ...t,
+    amount: convertToDefaultCurrency(t.amount, t.walletId),
+  }));
+
+  // Розподіляємо транзакції на витрати та доходи
+  const expenses = convertedTransactions.filter((t) => t.transactionType === 'CREDIT');
+  const incomes = convertedTransactions.filter((t) => t.transactionType === 'DEBIT');
+
+  // Обчислюємо максимальні витрати
   const maxExpense = expenses.length
     ? expenses.reduce((max, t) => (t.amount > max.amount ? t : max))
     : null;
 
-  // Calculate the maximum income
+  // Обчислюємо максимальні доходи
   const maxIncome = incomes.length
     ? incomes.reduce((max, t) => (t.amount > max.amount ? t : max))
     : null;
 
-  // Calculate the average daily expense (up to today's day)
+  // Поточний день для обчислення середніх витрат
   const today = new Date();
-  const currentDay = today.getFullYear() === year && today.getMonth() === month - 1
-    ? today.getDate()
-    : endDate.getDate();
+  const currentDay =
+    today.getFullYear() === year && today.getMonth() === month - 1
+      ? today.getDate()
+      : endDate.getDate();
+
+  // Сума витрат та середні витрати
   const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
   const averageDailyExpense = expenses.length ? totalExpense / currentDay : 0;
 
-  // Calculate the average daily income (for the whole month)
+  // Сума доходів та середні доходи
   const totalIncome = incomes.reduce((sum, t) => sum + t.amount, 0);
   const averageDailyIncome = incomes.length ? totalIncome / endDate.getDate() : 0;
 
@@ -529,4 +731,3 @@ export const getMonthlyInfoData = async (
     averageDailyIncome: +averageDailyIncome.toFixed(2),
   };
 };
-

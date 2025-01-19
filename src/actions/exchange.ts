@@ -57,6 +57,36 @@ export const editExchange = async (data: ExchangeFormValues, id:string) => {
           secondCurrencyId: data.secondCurrencyId
         }
       });
+
+      // пошуку парного курсу
+
+      const secondExchangeRate = await prisma.exchangeRate.findFirst({
+        where:{
+          userId: session.user.id,
+          firstCurrencyId: data.secondCurrencyId,
+          secondCurrencyId: data.firstCurrencyId
+        }
+      })
+      if(secondExchangeRate){
+
+        if(secondExchangeRate.id){
+          
+          await prisma.exchangeRate.update({
+            where:{
+              id: secondExchangeRate.id
+            },
+            data: {
+              rate: 1 / data.rate,
+              date: data.date,
+              userId: session.user.id,
+              firstCurrencyId: data.secondCurrencyId,
+              secondCurrencyId: data.firstCurrencyId
+            }
+          })
+        }
+      }
+
+
   } catch (error) {
     console.error(error);
   }
@@ -66,7 +96,36 @@ export const editExchange = async (data: ExchangeFormValues, id:string) => {
 
 // видаляємо валюту, ід самої валюти
 export const deleteExchange = async (id:string) => {
+  const session = await auth();
+    if (!session?.user.id) return;
   try {
+
+    // спочатку знайдемо дані для пошуку парного курсу
+    const exchangeRateFirst = await prisma.exchangeRate.findFirst({
+      where:{
+        userId: session.user.id,
+        id
+      }
+    })
+    if(exchangeRateFirst){
+
+      const exchangeRateSecond = await prisma.exchangeRate.findFirst({
+        where:{
+          userId: session.user.id,
+          firstCurrencyId: exchangeRateFirst.secondCurrencyId,
+          secondCurrencyId: exchangeRateFirst.firstCurrencyId
+        }
+      })
+      //видаляємо другий парний курс
+      if(exchangeRateSecond){
+        await prisma.exchangeRate.delete({
+          where:{
+            id: exchangeRateSecond.id
+          }
+        });
+      }
+    }
+    // видаляємо основний курс
      await prisma.exchangeRate.delete({
         where:{
           id

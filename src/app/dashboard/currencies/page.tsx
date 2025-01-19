@@ -49,7 +49,7 @@ const CurrenciesPage = async () => {
     distinct: ["currencyId"], // Унікальні значення за `currencyId`
   });
 
-  // console.log("обміни", exchanges);
+
 
   return (
     <div className="px-2">

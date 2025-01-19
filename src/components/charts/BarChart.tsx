@@ -1,4 +1,5 @@
 "use client";
+import { formatDigits } from "@/lib/utils";
 import { Currency, UserSettings } from "@prisma/client";
 import React from "react";
 import {
@@ -21,15 +22,21 @@ type DataType = {
 type ValueType = number | string  // Дозволені типи значень
 type NameType = string; // Тип для назв
 
-const CustomTooltip: React.FC<TooltipProps<ValueType, NameType>> = ({ active, payload, label }) => {
+interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
+  cyrSymbol: string;
+}
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, label, cyrSymbol }) => {
   if (active && payload && payload.length) {
-    return (
-      <div className="border-foreground border shadow-md p-2 rounded bg-background text-foreground">
-        <p className="text-sm font-bold">{`День: ${label}`}</p>
-        <p className="text-sm">{`Сума: ${payload[0].value}`}</p>
-      </div>
-    );
-  }
+      if (payload[0].value !== undefined) {
+        return (
+          <div className="border-foreground border shadow-md p-2 rounded bg-background text-foreground">
+            <p className="text-sm font-bold">{`День: ${label}`}</p>
+            <p className="text-sm">{`Сума: ${formatDigits(payload[0].value)} ${cyrSymbol}`}</p>
+          </div>
+        );
+      }
+    }
 
   return null;
 };
@@ -45,7 +52,7 @@ interface CustomLabelProps {
 }
 
 const CustomLabel: React.FC<CustomLabelProps> = ({ x = 0, y = 0, width = 0, height = 0, value, curSymbol }) => {
-  const text = `${value} ${curSymbol}`;
+  const text = `${value}`;
   const textWidth = text.length * 6; // Приблизна ширина тексту
   const textHeight = 12; // Приблизна висота тексту
   const padding = 15; // Відступи від меж бара
@@ -78,7 +85,7 @@ const CustomLabel: React.FC<CustomLabelProps> = ({ x = 0, y = 0, width = 0, heig
         whiteSpace: 'nowrap',
       }}
     >
-      {text}
+      {formatDigits(text)} {`${curSymbol}`}
     </text>
   );
 };
@@ -107,7 +114,7 @@ const DashboardBarChart = ({
       </defs>
       <XAxis dataKey="catName" angle={-90} textAnchor='end' height={110} className="text-[8px] sm:text-sm"/>
       <YAxis />
-      <Tooltip content={<CustomTooltip/>}/>
+      <Tooltip content={<CustomTooltip cyrSymbol={userSettings.defaultCurrency.symbol}/>}/>
       <Bar
         dataKey="sum"
         stroke={`#${color}`}

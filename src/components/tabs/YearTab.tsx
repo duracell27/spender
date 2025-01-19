@@ -60,7 +60,7 @@ const DayTab = async ({
     pageNumber,
     10
   );
-  console.log(total);
+ 
   const { balance, creditSum, debitSum, error } = calculateBalanceAndSums(
     wallets,
     userSettings.activeWalletId,
