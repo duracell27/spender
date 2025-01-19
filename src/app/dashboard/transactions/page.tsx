@@ -4,12 +4,10 @@ import { auth } from "../../../../auth";
 import { prisma } from "../../../../prisma/prisma";
 
 import DashboardTabs from "@/components/tabs/DashboardTabs";
-// import WalletSelect from "@/components/WalletSelect";
+
 import { ActiveWalletSelect } from "@/components/forms/UserDashboardWaletSelect";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-// import { Currency, UserSettings } from "@prisma/client";
-// import DashboardWrapper from "@/components/DashboardWrapper";
 
 const TransactionPage = async ({ searchParams }: { searchParams: { tab?: string } }) => {
   
@@ -33,10 +31,6 @@ const TransactionPage = async ({ searchParams }: { searchParams: { tab?: string 
     where: {
       userId: session.user.id,
     },
-    // include: {
-      //   currency1: true,
-      //   currency2: true,
-      // },
     })
     
     const userSettings = await prisma.userSettings.findUnique({

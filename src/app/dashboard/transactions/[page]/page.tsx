@@ -6,7 +6,15 @@ import { ActiveWalletSelect } from "@/components/forms/UserDashboardWaletSelect"
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-const TransactionPage = async ({ params, searchParams }: { params: { page: string }, searchParams: { tab?: string } }) => {
+type PageProps = {
+  params: { page: string };
+  searchParams: { tab?: string };
+};
+
+const TransactionPage = async ({ params, searchParams }: PageProps) => {
+
+  console.log('params', params)
+
   const { page } = params; // отримуємо номер сторінки для пагінації
   const pageNumber = parseInt(page, 10) || 1 // якщо не було передано номер сторінки пагінації то ставив першу
   const searchParam = searchParams.tab; // отримуємо параметр з строки щоб визначити яку вкладку потрібно відобразити
