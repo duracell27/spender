@@ -9,7 +9,7 @@ import { ActiveWalletSelect } from "@/components/forms/UserDashboardWaletSelect"
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-const TransactionPage = async ({ searchParams }: { searchParams: { tab?: string } }) => {
+const TransactionPage = async ({ searchParams }: { searchParams: Promise<{ tab?: string }> }) => {
   
   const session = await auth();
   if (!session?.user.id) return;
