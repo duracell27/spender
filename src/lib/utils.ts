@@ -96,23 +96,20 @@ export function calculateBalanceAndSums(
   }
 }
 
-export function formatDigits(amount: number | string): string {
-  // Перетворюємо вхідне значення на число
+export function formatDigits(amount: number | string, digits: number = 2): string {
+  // Convert the input to a number
   const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount;
 
-  // Перевіряємо, чи це валідне число
+  // Validate the number
   if (isNaN(numericAmount)) {
     throw new Error("Invalid input: amount must be a number or a numeric string");
   }
 
-  // Обрізаємо зайві десяткові знаки до двох без округлення
-  const truncatedAmount = Math.floor(numericAmount * 100) / 100;
-
-  // Форматуємо число з розділенням тисяч
+  // Format the number with the specified number of fractional digits
   const formatter = new Intl.NumberFormat("uk-UA", {
-    minimumFractionDigits: 0, // Завжди два десяткові знаки
-    maximumFractionDigits: 2, // Максимум два десяткові знаки
+    minimumFractionDigits: 0,
+    maximumFractionDigits: digits,
   });
 
-  return formatter.format(truncatedAmount);
+  return formatter.format(numericAmount);
 }

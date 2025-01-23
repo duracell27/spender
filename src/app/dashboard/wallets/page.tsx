@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDigits } from "@/lib/utils";
+import UserTransferMoneyForm from "@/components/forms/UserTransferMoneyForm";
 
 const WaletsPage = async () => {
   const currencys = await prisma.currency.findMany();
@@ -29,9 +30,16 @@ const WaletsPage = async () => {
     },
   });
 
+  const exchangeRates = await prisma.exchangeRate.findMany({
+    where: {
+      userId: session.user.id,
+    },
+  });
+
   return (
     <div className="">
       <UserWaletForm title="Додати рахунок" currencys={currencys} />
+      <UserTransferMoneyForm title="Перевести кошти" wallets={wallets} exchangeRates={exchangeRates}/>
 
       <Table>
         <TableCaption className="caption-top">Лист рахунків</TableCaption>
