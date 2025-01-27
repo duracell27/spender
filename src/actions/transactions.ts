@@ -126,7 +126,7 @@ export const editTransaction = async (
         amount: data.amount,
         transactionType: data.transactionType,
         userId: session.user.id,
-        date: data.date,
+        date: data.date.toISOString(),
         categoryId: data.categoryId,
         walletId: data.walletId,
       },

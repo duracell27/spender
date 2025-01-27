@@ -106,6 +106,8 @@ const UserTransactionForm = ({
     }
   }
 
+  console.log('form values', form.getValues())
+
   //обробка відправки форми
   async function onSubmit(data: TransactionFormValues) {
     try {
