@@ -35,18 +35,19 @@ enum Language {
 }
 
 model User {
-  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
-  email         String?       @unique
+  email         String?        @unique
   emailVerified DateTime?
   image         String?
-  role          Role          @default(USER)
+  role          Role           @default(USER)
   accounts      Account[]
   sessions      Session[]
   wallets       Wallet[]
   categories    Category[]
   transactions  Transaction[]
   exchangeRates ExchangeRate[]
+  transfers     Transfer[]
 
   Authenticator Authenticator[]
 
@@ -64,10 +65,10 @@ model UserSettings {
 
   activeWalletId String @default("all")
 
-  defaultCurrencyId String @db.ObjectId
-  defaultCurrency Currency @relation(fields: [defaultCurrencyId], references: [id], onDelete: Cascade)
+  defaultCurrencyId String   @db.ObjectId
+  defaultCurrency   Currency @relation(fields: [defaultCurrencyId], references: [id], onDelete: Cascade)
 
-  defaultPeriod Period @default(MONTH)
+  defaultPeriod   Period   @default(MONTH)
   defaultLanguage Language @default(UA)
 
   createdAt DateTime @default(now())
@@ -146,6 +147,9 @@ model Wallet {
   initialBalance     Int           @default(0)
   initialBalanceDate DateTime      @default(now())
 
+  transfers1 Transfer[] @relation("FromWallet")
+  transfers2 Transfer[] @relation("ToWallet")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -156,9 +160,9 @@ model Currency {
   code   String @unique
   symbol String @unique
 
-  wallets Wallet[]
-  userSettings UserSettings[]
-  exchangeRates ExchangeRate[] @relation("FirstCurrency")
+  wallets        Wallet[]
+  userSettings   UserSettings[]
+  exchangeRates  ExchangeRate[] @relation("FirstCurrency")
   exchangeRates2 ExchangeRate[] @relation("SecondCurrency")
 
   createdAt DateTime @default(now())
@@ -195,24 +199,52 @@ model Transaction {
   categoryId String   @db.ObjectId
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
+  transaction1  Transfer[] @relation("FromTransactionId")
+  transaction2  Transfer[] @relation("ToTransactionId")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
 model ExchangeRate {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  userId     String   @db.ObjectId
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  date       DateTime @default(now())
+  date DateTime @default(now())
 
   firstCurrencyId String   @db.ObjectId
   currency1       Currency @relation("FirstCurrency", fields: [firstCurrencyId], references: [id], onDelete: Cascade)
 
-  rate       Float
+  rate Float
 
   secondCurrencyId String   @db.ObjectId
   currency2        Currency @relation("SecondCurrency", fields: [secondCurrencyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Transfer {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fromWalletId String @db.ObjectId
+  wallet1      Wallet @relation("FromWallet", fields: [fromWalletId], references: [id], onDelete: Cascade)
+
+  amout Float
+
+  toWalletId String @db.ObjectId
+  wallet2    Wallet @relation("ToWallet", fields: [toWalletId], references: [id], onDelete: Cascade)
+
+  fromTransactionId String @db.ObjectId
+  transaction1      Transaction @relation("FromTransactionId", fields: [fromTransactionId], references: [id], onDelete: Cascade)
+
+  toTransactionId String @db.ObjectId
+  transaction2    Transaction @relation("ToTransactionId", fields: [toTransactionId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

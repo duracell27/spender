@@ -54,13 +54,14 @@ const DayTab = async ({
 }) => {
   const session = await auth();
   if (!session?.user.id) return;
-  const { transactions, startDate, total } = await getTransactionsByPeriod(
-    "year",
-    userSettings.activeWalletId,
-    pageNumber,
-    10
-  );
- 
+  const {
+    transactions,
+    startDate,
+    total,
+    debitTotal = 0,
+    creditTotal = 0,
+  } = await getTransactionsByPeriod("year", userSettings.activeWalletId, pageNumber, 10);
+
   const { balance, creditSum, debitSum, error } = calculateBalanceAndSums(
     wallets,
     userSettings.activeWalletId,
@@ -107,11 +108,10 @@ const DayTab = async ({
   return (
     <div>
       <div className="font-bold text-center my-4 text-2xl">{format(startDate, "yyyy", { locale: uk })}</div>
-      <div className="flex justify-evenly text-xs sm:text-sm">
+      <div className="flex justify-evenly items-center text-xs sm:text-sm">
         <div className="text-green-500 p-3 px-3 sm:px-5 bg-green-200 rounded-full">
           <p className="flex items-center">
-            {" "}
-            Прибуток {formatDigits(debitSum)} {currency?.symbol}{" "}
+            {`Прибуток за період ${formatDigits(debitTotal)} ${currency?.symbol}`}
             {error && (
               <TooltipProvider>
                 <Tooltip>
@@ -128,14 +128,15 @@ const DayTab = async ({
           {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
             <p>Курс не задано</p>
           ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
-            <p className="text-center text-xs">
-              {formatDigits(exchanges.rate * debitSum)}
+            <p className="text-center text-xs text-gray-500">
+              ~{formatDigits(exchanges.rate * debitTotal)}
               {userSettings.defaultCurrency.symbol}
             </p>
           ) : (
             ""
           )}
         </div>
+
         <div
           className={
             balance >= 0
@@ -143,9 +144,29 @@ const DayTab = async ({
               : "text-red-500 p-3 px-3 sm:px-5 bg-red-200 rounded-full"
           }
         >
-          <p className="flex items-center">
-            {" "}
-            Баланс {formatDigits(balance)} {currency?.symbol}
+          <div className="flex items-center">
+            <div className="flex flex-col justify-center text-center">
+              <div className="font-bold text-2xl">
+                Баланс {formatDigits(balance)} {currency?.symbol}
+                {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
+                  <p>Курс не задано</p>
+                ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
+                  <p className="text-center text-xs text-gray-500">
+                    ~{formatDigits(exchanges.rate * balance)}
+                    {userSettings.defaultCurrency.symbol}
+                  </p>
+                ) : (
+                  ""
+                )}
+              </div>
+              <div className="my-1"></div>
+              <span className="text-red-500">
+                Витрати {formatDigits(creditSum)} {currency?.symbol}
+              </span>
+              <span className="text-green-500">
+                Прибуток {formatDigits(debitSum)} {currency?.symbol}
+              </span>
+            </div>
             {error && (
               <TooltipProvider>
                 <Tooltip>
@@ -158,22 +179,12 @@ const DayTab = async ({
                 </Tooltip>
               </TooltipProvider>
             )}
-          </p>
-          {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
-            <p>Курс не задано</p>
-          ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
-            <p className="text-center text-xs">
-              {formatDigits(exchanges.rate * balance)}
-              {userSettings.defaultCurrency.symbol}
-            </p>
-          ) : (
-            ""
-          )}
+          </div>
         </div>
+
         <div className="text-red-500 p-3 px-3 sm:px-5 bg-red-200 rounded-full">
           <p className="flex items-center">
-            {" "}
-            Витрати {formatDigits(creditSum)} {currency?.symbol}{" "}
+            {`Витрати за період ${formatDigits(creditTotal)} ${currency?.symbol}`}
             {error && (
               <TooltipProvider>
                 <Tooltip>
@@ -190,8 +201,8 @@ const DayTab = async ({
           {currency.id !== userSettings.defaultCurrencyId && exchanges === null ? (
             <p>Курс не задано</p>
           ) : currency.id !== userSettings.defaultCurrencyId && exchanges ? (
-            <p className="text-center text-xs">
-              {formatDigits(exchanges.rate * creditSum)}
+            <p className="text-center text-xs text-gray-500">
+              ~{formatDigits(exchanges.rate * creditTotal)}
               {userSettings.defaultCurrency.symbol}
             </p>
           ) : (
@@ -308,19 +319,26 @@ const DayTab = async ({
         {total > 10 ? (
           <Pagination>
             <PaginationContent className="mt-2">
-              {pageNumber>1 ? (<PaginationItem className="border">
-                <PaginationPrevious href={`/dashboard/transactions/${pageNumber - 1}?tab=${currentTab}`} />
-              </PaginationItem>):('')}
-              
+              {pageNumber > 1 ? (
+                <PaginationItem className="border">
+                  <PaginationPrevious href={`/dashboard/transactions/${pageNumber - 1}?tab=${currentTab}`} />
+                </PaginationItem>
+              ) : (
+                ""
+              )}
+
               <PaginationItem className="border">
                 <PaginationLink href={`/dashboard/transactions/${pageNumber}?tab=${currentTab}`}>
                   {pageNumber}
                 </PaginationLink>
               </PaginationItem>
-              {total> (pageNumber)*10 ? (<PaginationItem className="border">
-                <PaginationNext href={`/dashboard/transactions/${pageNumber + 1}?tab=${currentTab}`} />
-              </PaginationItem>):('')}
-              
+              {total > pageNumber * 10 ? (
+                <PaginationItem className="border">
+                  <PaginationNext href={`/dashboard/transactions/${pageNumber + 1}?tab=${currentTab}`} />
+                </PaginationItem>
+              ) : (
+                ""
+              )}
             </PaginationContent>
           </Pagination>
         ) : (
