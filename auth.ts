@@ -34,6 +34,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             userId: user.id,
           },
         });
+        await prisma.category.create({
+          data: {
+            name: "Перенесення",
+            categoryType: "TRANSFER",
+            userId: user.id,
+          },
+        });
       }
     }
   }

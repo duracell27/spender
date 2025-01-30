@@ -20,13 +20,13 @@ import { formatDigits } from "@/lib/utils";
 
 // додавання транзакції на базі даних із форми
 // також перераховуємо баланси у рахунку у відповідності до суми витрати
-export const addTransaction = async (data: TransactionFormValues) => {
+export const addTransaction = async (data: TransactionFormValues, transfer: boolean = false) => {
   const session = await auth();
   if (!session?.user.id) return;
 
   // додавання витрати
   try {
-    await prisma.transaction.create({
+    const createdTransaction = await prisma.transaction.create({
       data: {
         title: data.title,
         amount: data.amount,
@@ -40,13 +40,19 @@ export const addTransaction = async (data: TransactionFormValues) => {
 
     // Оновлення балансу у відповідності до суми витрати
     // Визначаємо зміну балансу залежно від типу транзакції
+
     const balanceChange =
       data.transactionType === "CREDIT"
         ? -data.amount // Витрати
         : data.amount; // Дохід
 
-    const debitChange = data.transactionType === "DEBIT" ? data.amount : 0;
-    const creditChange = data.transactionType === "CREDIT" ? data.amount : 0;
+    let debitChange = 0;
+    let creditChange = 0;
+
+    if (transfer === false) {
+      debitChange = data.transactionType === "DEBIT" ? data.amount : 0;
+      creditChange = data.transactionType === "CREDIT" ? data.amount : 0;
+    }
 
     await prisma.wallet.update({
       where: {
@@ -64,11 +70,12 @@ export const addTransaction = async (data: TransactionFormValues) => {
         },
       },
     });
+
+    revalidatePath("/dashboard");
+    return createdTransaction.id;
   } catch (error) {
     console.error(error);
   }
-
-  revalidatePath("/dashboard");
 };
 
 // редагування транзакції на базі даних від форми та ід самої транзакції
@@ -162,7 +169,7 @@ export const editTransaction = async (data: TransactionFormValues, id: string) =
 };
 
 // видалямо транзакцію, отримуємо ід самої транзакції
-export const deleteTransaction = async (id: string) => {
+export const deleteTransaction = async (id: string, transfer: boolean = false) => {
   // знаходимо транзакцію щоб вімінусувати з рахунку її дані
   try {
     const transaction = await prisma.transaction.findUnique({
@@ -174,13 +181,19 @@ export const deleteTransaction = async (id: string) => {
 
     if (transaction) {
       // Визначаємо зміну балансу залежно від типу транзакції
+
       const balanceChange =
         transaction.transactionType === "CREDIT"
           ? transaction.amount // Витрати
           : -transaction.amount; // Дохід
 
-      const debitChange = transaction.transactionType === "DEBIT" ? -transaction.amount : 0;
-      const creditChange = transaction.transactionType === "CREDIT" ? -transaction.amount : 0;
+      let debitChange = 0;
+      let creditChange = 0;
+
+      if (transfer === false) {
+        debitChange = transaction.transactionType === "DEBIT" ? -transaction.amount : 0;
+        creditChange = transaction.transactionType === "CREDIT" ? -transaction.amount : 0;
+      }
 
       await prisma.wallet.update({
         where: {
@@ -333,9 +346,13 @@ export async function getTransactionsByPeriod(
         gte: startDate,
         lte: endDate,
       },
+
       userId: session.user.id,
       transactionType: "DEBIT",
       ...(activeWalletId !== "all" && { walletId: activeWalletId }),
+      category: {
+        name: { not: "Перенесення" }, // Виключаємо категорію "Перенесення"
+      },
     },
   });
 
@@ -352,6 +369,9 @@ export async function getTransactionsByPeriod(
       userId: session.user.id,
       transactionType: "CREDIT",
       ...(activeWalletId !== "all" && { walletId: activeWalletId }),
+      category: {
+        name: { not: "Перенесення" }, // Виключаємо категорію "Перенесення"
+      },
     },
   });
 
@@ -386,6 +406,9 @@ export async function getMonthlyExpenses(
       date: {
         gte: new Date(year, month - 1, 1), // Початок місяця
         lt: new Date(year, month, 1), // Початок наступного місяця
+      },
+      category: {
+        name: { not: "Перенесення" }, // Виключаємо категорію "Перенесення"
       },
     },
     include: {
@@ -500,6 +523,9 @@ export async function getMonthlyExpensesByCategory(
       date: {
         gte: startDate,
         lte: endDate,
+      },
+      category: {
+        name: { not: "Перенесення" }, // Виключаємо категорію "Перенесення"
       },
     },
     _sum: {
@@ -656,6 +682,9 @@ export const getMonthlyInfoData = async (
       date: {
         gte: startDate,
         lte: endDate,
+      },
+      category: {
+        name: { not: "Перенесення" }, // Виключаємо категорію "Перенесення"
       },
     },
   });

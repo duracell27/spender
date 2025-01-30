@@ -18,6 +18,7 @@ import {
 const CategoriesPage = async () => {
   const session = await auth();
   if (!session?.user.id) return;
+
   const categories = await prisma.category.findMany({
     where: {
       userId: session.user.id,
@@ -58,10 +59,10 @@ const CategoriesPage = async () => {
                   <span className="text-red-500 font-bold">Витрата</span>
                 ) : category.categoryType === "INCOME" ? (
                   <span className="text-green-500 font-bold">Дохід</span>
-                ):(<span className="text-gray-500 font-bold">Внесення</span>)}
+                ): category.categoryType === "TRANSFER" ?(<span className="text-gray-500 font-bold">Перенесення</span>):(<span className="text-gray-500 font-bold">Внесення</span>)}
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex items-center justify-end gap-2">
+                {( category.categoryType !== 'TRANSFER' && category.categoryType !== 'INIT') ? (<div className="flex items-center justify-end gap-2">
                   <UserCategoryForm
                     title={<Pencil />}
                     edit={true}
@@ -74,7 +75,8 @@ const CategoriesPage = async () => {
                     fn={deleteCategory}
                     id={category.id}
                   />
-                </div>
+                </div>):('') }
+                
               </TableCell>
             </TableRow>
           ))}

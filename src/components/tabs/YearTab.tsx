@@ -260,7 +260,7 @@ const DayTab = async ({
                 <TableCell className="font-medium">{transaction.wallet.name}</TableCell>
                 <TableCell className="text-right">
                   <div className="hidden sm:block">
-                    <div className="flex justify-end gap-2">
+                  {transaction.category.name !== 'Перенесення' ? (<div className="flex justify-end gap-2">
                       <UserTransactionForm
                         title={<Pencil />}
                         edit={true}
@@ -277,7 +277,7 @@ const DayTab = async ({
                         fn={deleteTransaction}
                         id={transaction.id}
                       />
-                    </div>
+                    </div>):(<>Змінити можна в рахунках</>)}
                   </div>
                   <div className="block sm:hidden">
                     <Dialog>
@@ -288,7 +288,7 @@ const DayTab = async ({
                         <DialogHeader>
                           <DialogTitle>Видалити чи редагувати?</DialogTitle>
                           <DialogDescription>
-                            <div className="flex justify-center gap-2 mt-4">
+                          {transaction.category.name !== 'Перенесення'?(<div className="flex justify-center gap-2 mt-4">
                               <UserTransactionForm
                                 title={<Pencil />}
                                 edit={true}
@@ -305,7 +305,7 @@ const DayTab = async ({
                                 fn={deleteTransaction}
                                 id={transaction.id}
                               />
-                            </div>
+                            </div>):(<>Змінити можна в рахунках</>)}
                           </DialogDescription>
                         </DialogHeader>
                       </DialogContent>

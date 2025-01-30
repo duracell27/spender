@@ -16,6 +16,7 @@ enum CategoryType {
   SPENDING
   INCOME
   INIT
+  TRANSFER
 }
 
 enum TransactionType {
@@ -235,7 +236,8 @@ model Transfer {
   fromWalletId String @db.ObjectId
   wallet1      Wallet @relation("FromWallet", fields: [fromWalletId], references: [id], onDelete: Cascade)
 
-  amout Float
+  amount Float
+  changed Float
 
   toWalletId String @db.ObjectId
   wallet2    Wallet @relation("ToWallet", fields: [toWalletId], references: [id], onDelete: Cascade)

@@ -18,6 +18,8 @@ import {
 } from "../ui/dialog";
 import { formatDigits } from "@/lib/utils";
 import { Input } from "../ui/input";
+import { addTransfer, editTransfer } from "@/actions/transfer";
+// import { set } from "date-fns";
 // import { editUserSettings } from "@/actions/userSettings";
 
 type WalletWithCurrency = Wallet & { currency: Currency };
@@ -36,6 +38,8 @@ const UserTransferMoneyForm = ({
   title,
   edit,
   exchangeRates,
+  data,
+  id
 }: //data,
 // currencies,
 // userSettings,
@@ -43,6 +47,7 @@ const UserTransferMoneyForm = ({
   wallets: WalletWithCurrency[];
   title: string | ReactNode;
   edit?: boolean;
+  id?: string;
   data?: TransferFormValues;
   exchangeRates: ExchangeRate[];
   // currencies: Currency[];
@@ -60,21 +65,38 @@ const UserTransferMoneyForm = ({
   //обробка відправки форми
   async function onSubmit(data: TransferFormValues) {
     try {
-      console.log(data);
-      //await editUserSettings(data, userSettings.id);
-      toast("Переказ успішно додано!");
-    } catch (error) {
-      console.error(error);
-      toast("Щось пішло не так. Спробуйте ще раз.");
-    }
+          if (edit) {
+            await editTransfer(data, exchangeRate, id!);
+            toast("Транзакція відредагована!");
+          } else {
+            await addTransfer(data, exchangeRate); // Виклик API для додавання категорії
+            toast("Транзакція успішно додана!");
+          }
+          form.reset(); // Очищення форми
+          setIsOpen(false); // Закриття діалогу
+        } catch (error) {
+          console.error(error);
+          toast("Щось пішло не так. Спробуйте ще раз.");
+        }
+    // try {
+    //   console.log(data);
+    //   await addTransfer(data, exchangeRate);
+    //   setIsOpen(false);
+    //   //await editUserSettings(data, userSettings.id);
+    //   toast("Переказ успішно додано!");
+    // } catch (error) {
+    //   console.error(error);
+    //   toast("Щось пішло не так. Спробуйте ще раз.");
+    //   setIsOpen(false);
+    // }
   }
   const fromWallet = form.watch("fromWalletId");
   const toWallet = form.watch("toWalletId");
   const amount = form.watch("amount");
 
-  console.log("amount", amount);
-  console.log("wallet", toWallet);
-  console.log("exp", exchangeRate);
+  // console.log("amount", amount);
+  // console.log("wallet", toWallet);
+  // console.log("exp", exchangeRate);
 
   const getExchangeRate = async (fromWallet: string, toWallet: string) => {
     const fromWalletObj = wallets.find((wallet) => wallet.id === fromWallet);
@@ -93,7 +115,7 @@ const UserTransferMoneyForm = ({
       if (exchangeRate) {
         setExchangeRate(exchangeRate.rate);
       } else {
-        setExchangeRate(0); // Reset if no rate is found
+        setExchangeRate(1); // Reset if no rate is found
       }
     }
   };
@@ -137,7 +159,7 @@ const UserTransferMoneyForm = ({
               <FormField
                 control={form.control}
                 name="fromWalletId"
-                //  defaultValue={userSettings.activeWalletId}
+                defaultValue={edit ? data?.fromWalletId : ''}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>З рахунка</FormLabel>
@@ -165,7 +187,7 @@ const UserTransferMoneyForm = ({
               <FormField
                 control={form.control}
                 name="amount"
-                defaultValue={0}
+                defaultValue={edit ? data?.amount : 0}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Сума переводу</FormLabel>
@@ -185,7 +207,7 @@ const UserTransferMoneyForm = ({
               <FormField
                 control={form.control}
                 name="toWalletId"
-                //  defaultValue={userSettings.activeWalletId}
+                  defaultValue={edit ? data?.toWalletId : ''}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>На рахунок</FormLabel>
