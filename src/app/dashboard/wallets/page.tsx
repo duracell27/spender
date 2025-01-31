@@ -45,32 +45,34 @@ const WaletsPage = async () => {
     },
     include: {
       wallet1: {
-        select:{
+        select: {
           name: true,
           currency: {
-            select:{
+            select: {
               symbol: true,
-            }
-          }
-        }
+            },
+          },
+        },
       },
       wallet2: {
-        select:{
+        select: {
           name: true,
           currency: {
-            select:{
+            select: {
               symbol: true,
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     },
   });
 
   return (
     <div className="">
-      <UserWaletForm title="Додати рахунок" currencys={currencys} />
-      <UserTransferMoneyForm title="Перевести кошти" wallets={wallets} exchangeRates={exchangeRates}/>
+      <div className="flex gap-2">
+        <UserWaletForm title="Додати рахунок" currencys={currencys} />
+        <UserTransferMoneyForm title="Перевести кошти" wallets={wallets} exchangeRates={exchangeRates} />
+      </div>
 
       <Table>
         <TableCaption className="caption-top">Лист рахунків</TableCaption>
@@ -87,7 +89,7 @@ const WaletsPage = async () => {
             <TableRow key={wallet.id}>
               <TableCell className="font-medium">{wallet.name}</TableCell>
               <TableCell>
-                {formatDigits( wallet.balance)} {wallet.currency.symbol}
+                {formatDigits(wallet.balance)} {wallet.currency.symbol}
               </TableCell>
 
               <TableCell className="text-right">
@@ -99,19 +101,13 @@ const WaletsPage = async () => {
                     id={wallet.id}
                     currencys={currencys}
                   />
-                  <Confirm
-                    title={<Trash2 />}
-                    actionButtonTitle="Видалити"
-                    fn={deleteWallet}
-                    id={wallet.id}
-                  />
+                  <Confirm title={<Trash2 />} actionButtonTitle="Видалити" fn={deleteWallet} id={wallet.id} />
                 </div>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-
 
       <Table>
         <TableCaption className="caption-top">Лист переказів</TableCaption>
@@ -128,20 +124,18 @@ const WaletsPage = async () => {
         <TableBody>
           {transfers.map((trasfer) => (
             <TableRow key={trasfer.id}>
-              <TableCell className="font-medium">{format(trasfer.createdAt, "dd.MM", { locale: uk })}</TableCell>
-              <TableCell>
-                {trasfer.wallet1.name}
+              <TableCell className="font-medium">
+                {format(trasfer.createdAt, "dd.MM", { locale: uk })}
               </TableCell>
+              <TableCell>{trasfer.wallet1.name}</TableCell>
 
               <TableCell className="flex gap-2">
-                {trasfer.amount}{trasfer.wallet1.currency.symbol}
+                {formatDigits(trasfer.amount)} {trasfer.wallet1.currency.symbol}
                 <ArrowRightLeft className="size-4" />
-                {trasfer.changed}{trasfer.wallet2.currency.symbol}
+                {formatDigits(trasfer.changed)} {trasfer.wallet2.currency.symbol}
               </TableCell>
 
-              <TableCell>
-                {trasfer.wallet2.name}
-              </TableCell>
+              <TableCell>{trasfer.wallet2.name}</TableCell>
 
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">
@@ -150,7 +144,7 @@ const WaletsPage = async () => {
                     edit={true}
                     data={trasfer}
                     id={trasfer.id}
-                    wallets={wallets} 
+                    wallets={wallets}
                     exchangeRates={exchangeRates}
                   />
                   <Confirm
@@ -165,7 +159,6 @@ const WaletsPage = async () => {
           ))}
         </TableBody>
       </Table>
-      
     </div>
   );
 };

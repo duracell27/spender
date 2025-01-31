@@ -78,25 +78,11 @@ const UserTransferMoneyForm = ({
           console.error(error);
           toast("Щось пішло не так. Спробуйте ще раз.");
         }
-    // try {
-    //   console.log(data);
-    //   await addTransfer(data, exchangeRate);
-    //   setIsOpen(false);
-    //   //await editUserSettings(data, userSettings.id);
-    //   toast("Переказ успішно додано!");
-    // } catch (error) {
-    //   console.error(error);
-    //   toast("Щось пішло не так. Спробуйте ще раз.");
-    //   setIsOpen(false);
-    // }
   }
   const fromWallet = form.watch("fromWalletId");
   const toWallet = form.watch("toWalletId");
   const amount = form.watch("amount");
 
-  // console.log("amount", amount);
-  // console.log("wallet", toWallet);
-  // console.log("exp", exchangeRate);
 
   const getExchangeRate = async (fromWallet: string, toWallet: string) => {
     const fromWalletObj = wallets.find((wallet) => wallet.id === fromWallet);

@@ -38,7 +38,7 @@ const UserSettingForm = ({
   //обробка відправки форми
   async function onSubmit(data: SettingsFormValues) {
     try {
-      console.log(data);
+      
       await editUserSettings(data, userSettings.id);
       toast("Транзакція успішно додана!");
     } catch (error) {

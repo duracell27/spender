@@ -88,7 +88,7 @@ export const editTransfer = async (
     });
 
     if (transfer) {
-      console.log("єєєєєєєє трансфер");
+    
       //видалямо транзакції
       const oldFromTransaction = transfer.fromTransactionId;
       const oldToTransaction = transfer.toTransactionId;
@@ -131,15 +131,6 @@ export const editTransfer = async (
         );
 
         if (fromTransaction && toTransaction) {
-          console.log("початок");
-          console.log(session.user.id);
-          console.log(data.fromWalletId);
-          console.log(data.amount);
-          console.log(data.toWalletId);
-          console.log(data.amount * exchangeRate);
-          console.log(fromTransaction);
-          console.log(toTransaction);
-          console.log("кінець");
 
           await prisma.transfer.update({
             where: {
