@@ -62,6 +62,17 @@ const DashBoardMenu = () => {
           Валюти
         </div>
       </Link>
+      <Link href="/dashboard/zvit">
+        <div
+          className={`${
+            pathname === "/dashboard/zvit"
+              ? "bg-muted-foreground text-background"
+              : "bg-accent"
+          } flex  gap-2 items-center p-1 rounded-md hover:bg-foreground hover:text-background`}
+        >
+          Звіти
+        </div>
+      </Link>
     </div>
   );
 };
