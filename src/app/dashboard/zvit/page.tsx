@@ -1,24 +1,19 @@
 import { TestCalendar } from "@/components/forms/TestCalendar";
 import UserZvitByCategory from "@/components/forms/UserZvitByCategory";
-import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import React from "react";
 import { auth } from "../../../../auth";
 import { prisma } from "../../../../prisma/prisma";
 
 const ZvitPage = async () => {
-    const session = await auth();
+  const session = await auth();
   if (!session?.user.id) return;
 
   const categories = await prisma.category.findMany({
     where: {
       userId: session.user.id,
     },
-    orderBy: [
-      {categoryType: "asc"},
-      {name: "asc"}
-    ]
-    
+    orderBy: [{ categoryType: "asc" }, { name: "asc" }],
   });
 
   const userSettings = await prisma.userSettings.findUnique({
@@ -29,15 +24,18 @@ const ZvitPage = async () => {
       defaultCurrency: true,
     },
   });
+  if (!userSettings?.id) return null;
   return (
     <div>
-        <div>
+      <div>
         <Separator />
         Звіт
-        <UserZvitByCategory categories={categories} userSettings={userSettings}/>
+        
+          <UserZvitByCategory categories={categories} userSettings={userSettings} />
+        
       </div>
       <div className="">
-        <Separator/>
+        <Separator />
         Тест календаря
         <TestCalendar />
       </div>

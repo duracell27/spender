@@ -613,19 +613,26 @@ export const getMonthlyInfoData = async (
   };
 };
 
-interface ZvitChartData {
+export interface ZvitChartData {
   day: string;
   value: number;
 }
+
+export interface ExpensesResult {
+  data: ZvitChartData[];
+  total: number;
+}
+
 export async function getExpensesByCategoryAndDate(
   categoryId: string,
   dateFrom: Date,
-  dateTo: Date
-): Promise<ZvitChartData[]> {
+  dateTo: Date,
+  defaultCurrencyId: string
+): Promise<ExpensesResult> {
   const session = await auth();
-  if (!session?.user.id) return [];
+  if (!session?.user.id) return { data: [], total: 0 };
 
-  // Отримуємо всі витрати за категорією та датою
+  // Отримуємо всі витрати за категорією та датою разом із гаманцем користувача
   const transactions = await prisma.transaction.findMany({
     where: {
       categoryId,
@@ -635,31 +642,55 @@ export async function getExpensesByCategoryAndDate(
         lte: dateTo,
       },
     },
-    select: {
-      amount: true,
-      date: true,
+    include: {
+      wallet: true,
+    },
+  });
+
+  // Отримуємо курси валют для користувача
+  const exchangeRates = await prisma.exchangeRate.findMany({
+    where: {
+      userId: session.user.id,
     },
   });
 
   // Групуємо витрати по днях
   const groupedData: Record<string, number> = {};
+  let totalSum = 0; // Загальна сума витрат
 
   transactions.forEach((transaction) => {
-    const day = format(startOfDay(transaction.date), "yyyy-MM-dd"); // Форматуємо дату
-    groupedData[day] = (groupedData[day] || 0) + transaction.amount;
+    const day = format(startOfDay(transaction.date), "dd-MM-yyyy"); // Форматуємо дату
+    let amountInDefaultCurrency = transaction.amount;
+
+    // Якщо валюта транзакції не співпадає з основною
+    if (transaction.wallet.currencyId !== defaultCurrencyId) {
+      const exchangeRate = exchangeRates.find(
+        (rate) =>
+          rate.firstCurrencyId === defaultCurrencyId &&
+          rate.secondCurrencyId === transaction.wallet.currencyId
+      );
+      if (exchangeRate) {
+        amountInDefaultCurrency *= exchangeRate.rate;
+      } else {
+        amountInDefaultCurrency = 0; // Якщо немає курсу валют
+      }
+    }
+
+    groupedData[day] = (groupedData[day] || 0) + amountInDefaultCurrency;
+    totalSum += amountInDefaultCurrency;
   });
 
   // Створюємо масив всіх днів у діапазоні
   const allDays = eachDayOfInterval({ start: dateFrom, end: dateTo });
 
   // Формуємо кінцевий масив із заповненням нульових значень
-  const result: ZvitChartData[] = allDays.map((day) => {
-    const formattedDay = format(day, "yyyy-MM-dd");
+  const data: ZvitChartData[] = allDays.map((day) => {
+    const formattedDay = format(day, "dd-MM-yyyy");
     return {
       day: formattedDay,
       value: groupedData[formattedDay] || 0, // Якщо дня немає в `groupedData`, ставимо 0
     };
   });
 
-  return result;
+  return { data, total: totalSum };
 }
