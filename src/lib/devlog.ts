@@ -1,5 +1,9 @@
 export const devlog = [
   {
+    version: "0.18",
+    description: "Додана вкладка звіти, і звіт по категорії",
+  },
+  {
     version: "0.17",
     description: "Перенесення між рахунками",
   },

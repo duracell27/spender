@@ -333,7 +333,7 @@ const UserTransactionForm = ({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Дата транзакції</FormLabel>
-                    <Popover>
+                    <Popover modal={false}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -352,7 +352,7 @@ const UserTransactionForm = ({
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0 relative z-50 overflow-visible" align="start">
                         <Calendar
                           mode="single"
                           selected={field.value}
