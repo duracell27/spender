@@ -256,7 +256,7 @@ const DayTab = async ({
                 }
                 key={transaction.id}
               >
-                <TableCell>{format(transaction.date, "dd.MM", { locale: uk })}</TableCell>
+                <TableCell>{format(transaction.date, "dd.MM", { locale: uk })},{JSON.stringify(transaction.date)}</TableCell>
                 <TableCell>{transaction.title}</TableCell>
                 <TableCell>
                   {formatDigits(transaction.amount)} {currency?.symbol}

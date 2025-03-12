@@ -29,6 +29,7 @@ export const addTransaction = async (data: TransactionFormValues, transfer: bool
   // додавання витрати
   try {
     const dateTr = data.date.toISOString() 
+    console.log('DATAAAA', dateTr)
     const createdTransaction = await prisma.transaction.create({
       data: {
         title: data.title,
