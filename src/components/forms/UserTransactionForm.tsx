@@ -148,7 +148,7 @@ const UserTransactionForm = ({
             {title}
           </Button>
         </DialogTrigger>
-        <DialogContent className="overflow-y-auto h-full sm:h-auto bg-transparent">
+        <DialogContent className="overflow-y-auto h-full sm:h-auto">
           <DialogHeader>
             <DialogTitle>
               {edit ? (
@@ -333,8 +333,8 @@ const UserTransactionForm = ({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Дата транзакції</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
+                    <Popover >
+                      <PopoverTrigger asChild className="bg-red-300 hover:bg-green-300">
                         <FormControl>
                           <Button
                             variant={"outline"}
