@@ -148,7 +148,7 @@ const UserTransactionForm = ({
             {title}
           </Button>
         </DialogTrigger>
-        <DialogContent className="overflow-y-auto">
+        <DialogContent className="overflow-y-auto h-full">
           <DialogHeader>
             <DialogTitle>
               {edit ? (
