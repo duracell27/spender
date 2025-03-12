@@ -14,38 +14,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Calendar } from "@/components/ui/calendar";
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { addTransaction, editTransaction } from "@/actions/transactions";
-import {
-  Category,
-  TransactionType,
-  UserSettings,
-  Wallet,
-} from "@prisma/client";
+import { Category, TransactionType, UserSettings, Wallet } from "@prisma/client";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import Link from "next/link";
@@ -98,14 +85,13 @@ const UserTransactionForm = ({
     resolver: zodResolver(transactionSchema),
   });
 
-  if (userSettings && (form.getValues().walletId === undefined)) {
-    if(userSettings.activeWalletId === 'all'){
-      form.setValue("walletId", '');
-    }else{
+  if (userSettings && form.getValues().walletId === undefined) {
+    if (userSettings.activeWalletId === "all") {
+      form.setValue("walletId", "");
+    } else {
       form.setValue("walletId", userSettings.activeWalletId);
     }
   }
-
 
   //обробка відправки форми
   async function onSubmit(data: TransactionFormValues) {
@@ -130,19 +116,13 @@ const UserTransactionForm = ({
       <Dialog
         open={isOpen}
         onOpenChange={() => {
-          setIsOpen(!isOpen)
+          setIsOpen(!isOpen);
           form.reset();
         }}
       >
         <DialogTrigger className="" asChild>
           <Button
-            className={
-              edit
-                ? "bg-primary"
-                : initType === "CREDIT"
-                ? "bg-red-500 p-10"
-                : "bg-green-500 p-10"
-            }
+            className={edit ? "bg-primary" : initType === "CREDIT" ? "bg-red-500 p-10" : "bg-green-500 p-10"}
             onClick={() => setIsOpen(true)}
           >
             {title}
@@ -158,11 +138,7 @@ const UserTransactionForm = ({
               )}
             </DialogTitle>
             <DialogDescription>
-              {edit ? (
-                <span>Відредагуйте поля</span>
-              ) : (
-                <span>Заповніть поля і натисніть кнопку додати</span>
-              )}
+              {edit ? <span>Відредагуйте поля</span> : <span>Заповніть поля і натисніть кнопку додати</span>}
             </DialogDescription>
           </DialogHeader>
 
@@ -213,9 +189,10 @@ const UserTransactionForm = ({
                   <FormItem>
                     <FormLabel>Тип транзакції</FormLabel>
                     <Select
-                      onValueChange={(value)=>{field.onChange(value)
-                       
-                         form.resetField('categoryId')
+                      onValueChange={(value) => {
+                        field.onChange(value);
+
+                        form.resetField("categoryId");
                       }}
                       defaultValue={edit ? data?.transactionType : field.value}
                     >
@@ -264,7 +241,7 @@ const UserTransactionForm = ({
                       <SelectContent>
                         {categories.map((category, index) => {
                           if (
-                             form.getValues().transactionType === "DEBIT" &&
+                            form.getValues().transactionType === "DEBIT" &&
                             category.categoryType === "INCOME"
                           ) {
                             return (
@@ -296,16 +273,11 @@ const UserTransactionForm = ({
                 control={form.control}
                 name="walletId"
                 // value={edit ? data?.walletId : userSettings.activeWalletId}
-                defaultValue={
-                  edit ? data?.walletId : userSettings.activeWalletId
-                }
+                defaultValue={edit ? data?.walletId : userSettings.activeWalletId}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Рахунок</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Виберіть рахунок" />
@@ -333,8 +305,8 @@ const UserTransactionForm = ({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Дата транзакції</FormLabel>
-                    <Popover >
-                      <PopoverTrigger asChild className="bg-red-300 hover:bg-green-300">
+                    <Drawer>
+                      <DrawerTrigger asChild className="bg-red-300 hover:bg-green-300">
                         <FormControl>
                           <Button
                             variant={"outline"}
@@ -351,20 +323,25 @@ const UserTransactionForm = ({
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 relative z-50 overflow-visible" align="start">
+                      </DrawerTrigger>
+                      <DrawerContent className="w-auto p-0 flex items-center">
+                        <DrawerHeader>
+                          <DrawerTitle>Are you absolutely sure?</DrawerTitle>
+                          <DrawerDescription>This action cannot be undone.</DrawerDescription>
+                        </DrawerHeader>
                         <Calendar
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
                           locale={uk}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                          }
+                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                           initialFocus
                         />
-                      </PopoverContent>
-                    </Popover>
+                        <DrawerClose>
+                          <div className="p-3 bg-foreground text-background rounded-md">Зберегти</div>
+                        </DrawerClose>
+                      </DrawerContent>
+                    </Drawer>
 
                     <FormMessage />
                   </FormItem>
