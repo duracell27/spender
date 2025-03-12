@@ -28,13 +28,14 @@ export const addTransaction = async (data: TransactionFormValues, transfer: bool
 
   // додавання витрати
   try {
+    const dateTr = data.date.toISOString() 
     const createdTransaction = await prisma.transaction.create({
       data: {
         title: data.title,
         amount: data.amount,
         transactionType: data.transactionType,
         userId: session.user.id,
-        date: data.date,
+        date: dateTr,
         categoryId: data.categoryId,
         walletId: data.walletId,
       },
