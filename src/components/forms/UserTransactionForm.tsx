@@ -306,7 +306,7 @@ const UserTransactionForm = ({
                   <FormItem className="flex flex-col">
                     <FormLabel>Дата транзакції</FormLabel>
                     <Drawer>
-                      <DrawerTrigger asChild className="bg-red-300 hover:bg-green-300">
+                      <DrawerTrigger asChild>
                         <FormControl>
                           <Button
                             variant={"outline"}
@@ -326,8 +326,8 @@ const UserTransactionForm = ({
                       </DrawerTrigger>
                       <DrawerContent className="w-auto p-0 flex items-center">
                         <DrawerHeader>
-                          <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-                          <DrawerDescription>This action cannot be undone.</DrawerDescription>
+                          <DrawerTitle>Вкажіть дату витрати</DrawerTitle>
+                          <DrawerDescription></DrawerDescription>
                         </DrawerHeader>
                         <Calendar
                           mode="single"
@@ -337,8 +337,18 @@ const UserTransactionForm = ({
                           disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                           initialFocus
                         />
+                        <div className="">
+                          Тест дати:{" "}
+                          {field.value ? (
+                            format(field.value, "PPpp", { locale: uk })
+                          ) : (
+                            <span>Виберіть дату</span>
+                          )}
+                        </div>
                         <DrawerClose>
-                          <div className="p-3 bg-foreground text-background rounded-md">Зберегти</div>
+                          <div className="p-2 px-3 mb-3 bg-foreground text-background rounded-md">
+                            Зберегти
+                          </div>
                         </DrawerClose>
                       </DrawerContent>
                     </Drawer>
