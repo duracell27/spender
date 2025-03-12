@@ -333,7 +333,7 @@ const UserTransactionForm = ({
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Дата транзакції</FormLabel>
-                    <Popover modal={false}>
+                    <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
