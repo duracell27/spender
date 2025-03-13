@@ -100,7 +100,10 @@ const UserTransactionForm = ({
         await editTransaction(data, id!);
         toast("Транзакція відредагована!");
       } else {
-        console.log('form data',data);
+        console.log("form data before", data);
+        const dateInUTC = new Date(data.date).toISOString();
+        data.date = new Date(dateInUTC);
+        console.log("form data after", data);
         await addTransaction(data); // Виклик API для додавання категорії
         toast("Транзакція успішно додана!");
       }
