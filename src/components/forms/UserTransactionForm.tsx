@@ -97,25 +97,15 @@ const UserTransactionForm = ({
   async function onSubmit(data: TransactionFormValues) {
     try {
       if (edit) {
+        const localDate = new Date(data.date);
+        const dateInUTC = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+        data.date = dateInUTC;
         await editTransaction(data, id!);
         toast("Транзакція відредагована!");
       } else {
-        console.log("form data before", data);
-
-        // Отримуємо локальний час
         const localDate = new Date(data.date);
-        console.log("local date", localDate);
-
-        // Перетворюємо в UTC, коригуємо час з урахуванням різниці між локальним часом і UTC
         const dateInUTC = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
-        console.log("utc date", dateInUTC.toISOString());
-
-        // Заміщаємо значення в data.date на дату в UTC
         data.date = dateInUTC;
-
-        console.log("form data after", data);
-
-        // Виклик API для додавання транзакції
         await addTransaction(data);
         toast("Транзакція успішно додана!");
       }
