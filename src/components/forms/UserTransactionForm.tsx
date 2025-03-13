@@ -101,11 +101,22 @@ const UserTransactionForm = ({
         toast("Транзакція відредагована!");
       } else {
         console.log("form data before", data);
-        const dateInUTC = new Date(data.date).toISOString();
-        console.log("utc string", dateInUTC);
-        data.date = new Date(dateInUTC);
+
+        // Отримуємо локальний час
+        const localDate = new Date(data.date);
+        console.log("local date", localDate);
+
+        // Перетворюємо в UTC, коригуємо час з урахуванням різниці між локальним часом і UTC
+        const dateInUTC = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+        console.log("utc date", dateInUTC.toISOString());
+
+        // Заміщаємо значення в data.date на дату в UTC
+        data.date = dateInUTC;
+
         console.log("form data after", data);
-        await addTransaction(data); // Виклик API для додавання категорії
+
+        // Виклик API для додавання транзакції
+        await addTransaction(data);
         toast("Транзакція успішно додана!");
       }
       form.reset(); // Очищення форми
