@@ -101,7 +101,7 @@ const WaletsPage = async () => {
                     id={wallet.id}
                     currencys={currencys}
                   />
-                  <Confirm title={<Trash2 />} actionButtonTitle="Видалити" fn={deleteWallet} id={wallet.id} />
+                  <Confirm title={<Trash2 />} actionButtonTitle="Видалити" message="Рахунок видалено успішно" fn={deleteWallet} id={wallet.id} />
                 </div>
               </TableCell>
             </TableRow>
@@ -151,6 +151,7 @@ const WaletsPage = async () => {
                     title={<Trash2 />}
                     actionButtonTitle="Видалити"
                     fn={deleteTransfer}
+                    message="Переказ видалено успішно"
                     id={trasfer.id}
                   />
                 </div>

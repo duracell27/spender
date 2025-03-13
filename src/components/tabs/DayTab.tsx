@@ -256,7 +256,7 @@ const DayTab = async ({
                 }
                 key={transaction.id}
               >
-                <TableCell>{format(transaction.date, "dd.MM", { locale: uk })},{JSON.stringify(transaction.date)}</TableCell>
+                <TableCell>{format(transaction.date, "dd.MM", { locale: uk })}</TableCell>
                 <TableCell>{transaction.title}</TableCell>
                 <TableCell>
                   {formatDigits(transaction.amount)} {currency?.symbol}
@@ -278,6 +278,7 @@ const DayTab = async ({
                       />
                       <Confirm
                         title={<Trash2 />}
+                        message="Транзакція успішно видалена!"
                         actionButtonTitle="Видалити"
                         fn={deleteTransaction}
                         id={transaction.id}
@@ -308,6 +309,7 @@ const DayTab = async ({
                               <Confirm
                                 title={<Trash2 />}
                                 actionButtonTitle="Видалити"
+                                message="Транзакція успішно видалена!"
                                 fn={deleteTransaction}
                                 id={transaction.id}
                               />

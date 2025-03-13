@@ -17,10 +17,12 @@ const Confirm = ({
   id,
   fn,
   title,
+  message,
   actionButtonTitle,
 }: {
   title: string | ReactNode;
   id?: string;
+  message: string;
   fn?: (id: string) => void;
   actionButtonTitle: string;
 }) => {
@@ -30,7 +32,7 @@ const Confirm = ({
     if (fn && id) {
       try {
         fn(id);
-        toast("Валюта успішно видалена!");
+        toast(message);
       } catch (error) {
         console.log(error);
         toast("Щось пішло не так. Спробуйте ще раз.");

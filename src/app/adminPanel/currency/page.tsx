@@ -58,6 +58,7 @@ const AdminCurency = async () => {
                   <Confirm
                     title={<Trash2 />}
                     actionButtonTitle="Видалити"
+                    message="Валюта видалена успішно"
                     fn={deleteCurrency}
                     id={currency.id}
                   />

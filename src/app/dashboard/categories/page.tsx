@@ -72,6 +72,7 @@ const CategoriesPage = async () => {
                   <Confirm
                     title={<Trash2 />}
                     actionButtonTitle="Видалити"
+                    message="Категорія видалена успішно"
                     fn={deleteCategory}
                     id={category.id}
                   />

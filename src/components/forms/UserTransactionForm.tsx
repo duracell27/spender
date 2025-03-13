@@ -343,17 +343,10 @@ const UserTransactionForm = ({
                           disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                           initialFocus
                         />
-                        <div className="">
-                          Тест дати:{" "}
-                          {field.value ? (
-                            format(field.value, "PPpp", { locale: uk })
-                          ) : (
-                            <span>Виберіть дату</span>
-                          )}
-                        </div>
-                        <DrawerClose>
-                          <div className="p-2 px-3 mb-3 bg-foreground text-background rounded-md">
-                            Зберегти
+                        
+                        <DrawerClose >
+                          <div onClick={form.handleSubmit(onSubmit)} className="p-2 px-3 mb-3 bg-foreground text-background rounded-md">
+                          {edit ? "Редагувати" : "Створити"}
                           </div>
                         </DrawerClose>
                       </DrawerContent>

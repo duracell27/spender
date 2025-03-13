@@ -275,7 +275,9 @@ const DayTab = async ({
                         title={<Trash2 />}
                         actionButtonTitle="Видалити"
                         fn={deleteTransaction}
+                        message="Транзакція видалена успішно"
                         id={transaction.id}
+            
                       />
                     </div>):(<>Змінити можна в рахунках</>)}
                   </div>
@@ -303,6 +305,7 @@ const DayTab = async ({
                                 title={<Trash2 />}
                                 actionButtonTitle="Видалити"
                                 fn={deleteTransaction}
+                                message="Транзакція видалена успішно"
                                 id={transaction.id}
                               />
                             </div>):(<>Змінити можна в рахунках</>)}

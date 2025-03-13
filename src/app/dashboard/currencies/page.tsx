@@ -106,6 +106,7 @@ const CurrenciesPage = async () => {
               title={<Trash2 />}
               actionButtonTitle="Видалити"
               fn={deleteExchange}
+              message="Курс видалено успішно"
               id={item.id}
             />
           </div>
