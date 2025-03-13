@@ -102,6 +102,7 @@ const UserTransactionForm = ({
       } else {
         console.log("form data before", data);
         const dateInUTC = new Date(data.date).toISOString();
+        console.log("utc string", dateInUTC);
         data.date = new Date(dateInUTC);
         console.log("form data after", data);
         await addTransaction(data); // Виклик API для додавання категорії
